@@ -1,14 +1,33 @@
 "use client";
 
-import { Plus, ToggleLeft, ToggleRight, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { toggleLink, deleteLink } from "@/server/actions/links";
+import { createLink, toggleLink, deleteLink } from "@/server/actions/links";
+import { linkSchema, type LinkSchema } from "@/lib/validations";
 import type { Link } from "@/types";
 
 interface LinksManagerProps {
@@ -35,8 +54,65 @@ const VARIANT_COLORS: Record<string, "default" | "secondary" | "muted" | "outlin
   soft: "muted",
 };
 
+const TYPE_OPTIONS = [
+  { value: "whatsapp", label: "WhatsApp" },
+  { value: "url", label: "URL externa" },
+  { value: "instagram", label: "Instagram" },
+  { value: "download", label: "Download" },
+  { value: "form", label: "Formulário de contato" },
+  { value: "scroll", label: "Rolar para seção" },
+];
+
+const VARIANT_OPTIONS = [
+  { value: "primary", label: "Principal (destaque)" },
+  { value: "secondary", label: "Secundário" },
+  { value: "outline", label: "Contorno" },
+  { value: "ghost", label: "Ghost" },
+  { value: "soft", label: "Suave" },
+];
+
 export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps) {
   const [links, setLinks] = useState(initialLinks);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<LinkSchema>({
+    resolver: zodResolver(linkSchema),
+    defaultValues: {
+      label: "",
+      sublabel: "",
+      type: "whatsapp",
+      url: "",
+      whatsappMessage: "",
+      openInNewTab: true,
+      variant: "primary",
+      isEnabled: true,
+      trackingEnabled: true,
+    },
+  });
+
+  const watchedType = form.watch("type");
+
+  function openCreateDialog() {
+    form.reset();
+    setDialogOpen(true);
+  }
+
+  async function handleCreate(data: LinkSchema) {
+    setIsSubmitting(true);
+    try {
+      const result = await createLink(pageId, data);
+      if (result.success) {
+        setLinks((prev) => [...prev, result.data]);
+        toast.success("Link criado com sucesso");
+        setDialogOpen(false);
+      } else {
+        toast.error(result.error ?? "Erro ao criar link");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   async function handleToggle(linkId: string) {
     const result = await toggleLink(linkId);
@@ -62,6 +138,9 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
     }
   }
 
+  const needsUrl = ["url", "instagram", "download"].includes(watchedType);
+  const needsWhatsapp = watchedType === "whatsapp";
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -71,7 +150,7 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
             Gerencie os botões e links da sua página
           </p>
         </div>
-        <Button size="sm">
+        <Button size="sm" onClick={openCreateDialog}>
           <Plus className="h-4 w-4" />
           Novo link
         </Button>
@@ -87,7 +166,7 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
           {links.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-12 text-center">
               <p className="text-sm text-muted-foreground">
-                Nenhum link cadastrado.
+                Nenhum link cadastrado. Clique em &ldquo;Novo link&rdquo; para adicionar.
               </p>
             </div>
           ) : (
@@ -97,12 +176,10 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
                   key={link.id}
                   className={`flex items-center gap-4 px-6 py-4 transition-colors hover:bg-muted/30 ${!link.is_enabled ? "opacity-60" : ""}`}
                 >
-                  {/* Posição */}
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
                     {link.position + 1}
                   </span>
 
-                  {/* Info */}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <p className="truncate text-sm font-semibold text-foreground">
@@ -129,7 +206,6 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
                     </div>
                   </div>
 
-                  {/* Ações */}
                   <div className="flex shrink-0 items-center gap-2">
                     <Switch
                       checked={link.is_enabled}
@@ -151,6 +227,147 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
           )}
         </CardContent>
       </Card>
+
+      {/* ---- Dialog: criar novo link ---- */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Novo link</DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
+            {/* Label */}
+            <div className="space-y-1.5">
+              <Label htmlFor="label">Texto do botão *</Label>
+              <Input
+                id="label"
+                placeholder="Ex: Falar no WhatsApp"
+                {...form.register("label")}
+              />
+              {form.formState.errors.label && (
+                <p className="text-xs text-destructive">{form.formState.errors.label.message}</p>
+              )}
+            </div>
+
+            {/* Sublabel */}
+            <div className="space-y-1.5">
+              <Label htmlFor="sublabel">Texto secundário</Label>
+              <Input
+                id="sublabel"
+                placeholder="Ex: Respondo em até 24h"
+                {...form.register("sublabel")}
+              />
+            </div>
+
+            {/* Tipo */}
+            <div className="space-y-1.5">
+              <Label>Tipo *</Label>
+              <Select
+                value={form.watch("type")}
+                onValueChange={(v) => form.setValue("type", v as LinkSchema["type"])}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TYPE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.formState.errors.type && (
+                <p className="text-xs text-destructive">{form.formState.errors.type.message}</p>
+              )}
+            </div>
+
+            {/* URL (condicional) */}
+            {needsUrl && (
+              <div className="space-y-1.5">
+                <Label htmlFor="url">
+                  {watchedType === "download" ? "URL do arquivo" : "URL"}
+                </Label>
+                <Input
+                  id="url"
+                  type="url"
+                  placeholder="https://..."
+                  {...form.register("url")}
+                />
+                {form.formState.errors.url && (
+                  <p className="text-xs text-destructive">{form.formState.errors.url.message}</p>
+                )}
+              </div>
+            )}
+
+            {/* Mensagem WhatsApp (condicional) */}
+            {needsWhatsapp && (
+              <div className="space-y-1.5">
+                <Label htmlFor="whatsappMessage">Mensagem pré-definida</Label>
+                <Input
+                  id="whatsappMessage"
+                  placeholder="Olá! Gostaria de saber mais..."
+                  {...form.register("whatsappMessage")}
+                />
+              </div>
+            )}
+
+            {/* Variante */}
+            <div className="space-y-1.5">
+              <Label>Estilo visual</Label>
+              <Select
+                value={form.watch("variant")}
+                onValueChange={(v) => form.setValue("variant", v as LinkSchema["variant"])}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {VARIANT_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Toggles */}
+            <div className="space-y-3 rounded-xl bg-muted/40 p-3">
+              <div className="flex items-center justify-between">
+                <Label className="font-normal">Ativo na página</Label>
+                <Switch
+                  checked={form.watch("isEnabled")}
+                  onCheckedChange={(v) => form.setValue("isEnabled", v)}
+                />
+              </div>
+              {needsUrl && (
+                <div className="flex items-center justify-between">
+                  <Label className="font-normal">Abrir em nova aba</Label>
+                  <Switch
+                    checked={form.watch("openInNewTab")}
+                    onCheckedChange={(v) => form.setValue("openInNewTab", v)}
+                  />
+                </div>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setDialogOpen(false)}
+                disabled={isSubmitting}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Criando..." : "Criar link"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

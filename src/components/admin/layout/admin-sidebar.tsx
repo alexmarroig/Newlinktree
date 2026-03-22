@@ -4,6 +4,7 @@ import {
   BarChart3,
   Blocks,
   FileUp,
+  HelpCircle,
   LayoutDashboard,
   Link2,
   LogOut,
@@ -40,6 +41,11 @@ const NAV_ITEMS = [
     label: "Blocos",
     href: "/admin/blocks",
     icon: Blocks,
+  },
+  {
+    label: "FAQ",
+    href: "/admin/faq",
+    icon: HelpCircle,
   },
   {
     label: "Leads",
