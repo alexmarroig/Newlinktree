@@ -1,0 +1,68 @@
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+
+import { EditorLayout } from "@/features/editor/components/editor-layout";
+import { createClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = {
+  title: "Editor Visual",
+  robots: "noindex",
+};
+
+export default async function EditorPage() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) redirect("/auth/login");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!profile) redirect("/admin");
+
+  // Carrega a primeira página do perfil
+  const { data: page } = await supabase
+    .from("pages")
+    .select("id, slug, status, title")
+    .eq("profile_id", profile.id)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .single();
+
+  if (!page) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-16 text-center">
+        <p className="text-muted-foreground">
+          Nenhuma página encontrada. Configure sua página primeiro.
+        </p>
+      </div>
+    );
+  }
+
+  const [{ data: blocks }, { data: links }] = await Promise.all([
+    supabase
+      .from("blocks")
+      .select("*")
+      .eq("page_id", page.id)
+      .order("position", { ascending: true }),
+    supabase
+      .from("links")
+      .select("*")
+      .eq("page_id", page.id)
+      .order("position", { ascending: true }),
+  ]);
+
+  return (
+    <EditorLayout
+      page={page}
+      initialBlocks={blocks ?? []}
+      initialLinks={links ?? []}
+    />
+  );
+}
