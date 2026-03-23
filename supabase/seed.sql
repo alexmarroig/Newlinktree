@@ -10,7 +10,7 @@
 -- Variáveis (substitua pelos valores reais)
 DO $$
 DECLARE
-  v_user_id     UUID := 'SUBSTITUA-PELO-UUID-DO-USUARIO-AUTH';
+  v_user_id     UUID := '619d28a3-89c9-414c-be64-ea3bd98c6f70';
   v_profile_id  UUID := gen_random_uuid();
   v_page_id     UUID := gen_random_uuid();
   v_theme_id    UUID := gen_random_uuid();
