@@ -41,6 +41,72 @@ const ICON_CONFIG: Record<
   default: { Icon: Download, bg: "bg-stone-100", color: "text-stone-600" },
 };
 
+type CardStyles = {
+  card: string;
+  text: string;
+  subtext: string;
+  iconBg: string;
+  iconColor: string;
+};
+
+function getCardStyles(
+  variant: string,
+  isWhatsApp: boolean,
+  iconConfig: { bg: string; color: string },
+): CardStyles {
+  if (isWhatsApp) {
+    return {
+      card: "bg-[#25D366] shadow-sm",
+      text: "text-white",
+      subtext: "text-white/70",
+      iconBg: "bg-white/20",
+      iconColor: "text-white",
+    };
+  }
+  switch (variant) {
+    case "primary":
+      return {
+        card: "bg-stone-800 shadow-md",
+        text: "text-white",
+        subtext: "text-white/70",
+        iconBg: "bg-white/20",
+        iconColor: "text-white",
+      };
+    case "soft":
+      return {
+        card: "bg-stone-50 shadow-sm border border-stone-200",
+        text: "text-gray-800",
+        subtext: "text-gray-500",
+        iconBg: iconConfig.bg,
+        iconColor: iconConfig.color,
+      };
+    case "ghost":
+      return {
+        card: "bg-transparent border border-stone-200",
+        text: "text-gray-800",
+        subtext: "text-gray-500",
+        iconBg: iconConfig.bg,
+        iconColor: iconConfig.color,
+      };
+    case "outline":
+      return {
+        card: "bg-white border-2 border-stone-800",
+        text: "text-gray-900",
+        subtext: "text-gray-600",
+        iconBg: iconConfig.bg,
+        iconColor: iconConfig.color,
+      };
+    default: // "secondary" and any unknown future values
+      return {
+        card: "bg-white shadow-sm",
+        text: "text-gray-900",
+        subtext: "text-gray-500",
+        iconBg: iconConfig.bg,
+        iconColor: iconConfig.color,
+      };
+  }
+}
+
 export function LinktreeLinkCard({
   link,
   whatsappNumber,
@@ -50,6 +116,7 @@ export function LinktreeLinkCard({
   const { openModal } = useFormModal();
   const isWhatsApp = link.type === "whatsapp";
   const iconConfig = ICON_CONFIG[link.type] ?? ICON_CONFIG.default;
+  const styles = getCardStyles(link.variant, isWhatsApp, iconConfig);
 
   function buildHref(): string {
     if (link.type === "whatsapp") {
@@ -104,34 +171,35 @@ export function LinktreeLinkCard({
         </div>
       );
     }
-    const { Icon, bg, color } = iconConfig;
+    const { Icon } = iconConfig;
     return (
       <div
-        className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl ${
-          isWhatsApp ? "bg-white/20" : bg
-        }`}
+        className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl ${styles.iconBg}`}
       >
-        <Icon className={`h-5 w-5 ${isWhatsApp ? "text-white" : color}`} />
+        <Icon className={`h-5 w-5 ${styles.iconColor}`} />
       </div>
     );
   };
 
   // ── Shared card classes ─────────────────────────────────────────────────────
   const cardClass = [
-    "flex items-center h-[68px] w-full rounded-2xl px-4",
-    "shadow-sm transition-all duration-100",
+    "flex items-center min-h-[68px] py-3 w-full rounded-2xl px-4",
+    "transition-all duration-100",
     "active:scale-[0.97] active:shadow-none",
-    isWhatsApp ? "bg-[#25D366]" : "bg-white",
+    styles.card,
   ].join(" ");
 
   const label = (
-    <span
-      className={`flex-1 text-center text-[13px] font-semibold uppercase tracking-wide ${
-        isWhatsApp ? "text-white" : "text-gray-900"
-      }`}
-    >
-      {link.label}
-    </span>
+    <div className="flex flex-1 flex-col items-center justify-center text-center">
+      <span className={`text-[13px] font-semibold uppercase tracking-wide ${styles.text}`}>
+        {link.label}
+      </span>
+      {link.sublabel && (
+        <span className={`mt-0.5 text-[11px] font-normal ${styles.subtext}`}>
+          {link.sublabel}
+        </span>
+      )}
+    </div>
   );
 
   // Right spacer matches left thumb width so label stays centered
