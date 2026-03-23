@@ -63,6 +63,7 @@ export async function createLink(
       variant: data.variant,
       is_enabled: data.isEnabled,
       tracking_enabled: data.trackingEnabled,
+      thumbnail_url: data.thumbnailUrl || null,
       position,
       click_count: 0,
     })
@@ -135,6 +136,28 @@ export async function deleteLink(linkId: string): Promise<ApiResponse> {
     .eq("id", linkId);
 
   if (error) return { success: false, error: "Erro ao deletar link" };
+
+  revalidatePath("/admin/links");
+  return { success: true, data: undefined };
+}
+
+export async function setLinkThumbnail(
+  linkId: string,
+  thumbnailUrl: string | null,
+): Promise<ApiResponse> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { success: false, error: "Não autorizado" };
+
+  const { error } = await supabase
+    .from("links")
+    .update({ thumbnail_url: thumbnailUrl })
+    .eq("id", linkId);
+
+  if (error) return { success: false, error: "Erro ao atualizar thumbnail" };
 
   revalidatePath("/admin/links");
   return { success: true, data: undefined };

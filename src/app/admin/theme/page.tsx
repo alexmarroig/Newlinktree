@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { ThemeEditor } from "@/components/admin/theme/theme-editor";
+import { AppearanceEditor } from "@/components/admin/theme/appearance-editor";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Tema & Branding",
+  title: "Aparência",
   robots: "noindex",
 };
 
@@ -20,17 +20,28 @@ export default async function ThemePage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id")
+    .select("*")
     .eq("user_id", user.id)
     .single();
 
   if (!profile) redirect("/admin");
 
-  const { data: theme } = await supabase
-    .from("themes")
-    .select("*")
-    .eq("profile_id", profile.id)
-    .single();
+  const [{ data: theme }, { data: page }, { data: settings }] = await Promise.all([
+    supabase.from("themes").select("*").eq("profile_id", profile.id).single(),
+    supabase.from("pages").select("slug").eq("profile_id", profile.id).single(),
+    supabase.from("settings").select("*").eq("profile_id", profile.id).single(),
+  ]);
 
-  return <ThemeEditor profileId={profile.id} theme={theme ?? undefined} />;
+  return (
+    // Break out of admin-container padding so the editor fills the full area
+    <div className="-m-6">
+      <AppearanceEditor
+        profileId={profile.id}
+        profile={profile}
+        theme={theme ?? undefined}
+        pageSlug={page?.slug ?? ""}
+        settings={settings ?? undefined}
+      />
+    </div>
+  );
 }

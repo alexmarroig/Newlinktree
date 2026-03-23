@@ -88,6 +88,7 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
       variant: "primary",
       isEnabled: true,
       trackingEnabled: true,
+      thumbnailUrl: "",
     },
   });
 
@@ -330,6 +331,20 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Thumbnail URL */}
+            <div className="space-y-1.5">
+              <Label htmlFor="thumbnailUrl">Imagem do botão (URL)</Label>
+              <Input
+                id="thumbnailUrl"
+                type="url"
+                placeholder="https://... (opcional)"
+                {...form.register("thumbnailUrl")}
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Cole a URL de uma imagem para aparecer ao lado do botão. Use Arquivos para fazer upload.
+              </p>
             </div>
 
             {/* Toggles */}

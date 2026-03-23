@@ -158,6 +158,20 @@ export function LinktreeLinkCard({
 
   // ── Left thumbnail ──────────────────────────────────────────────────────────
   const LeftThumb = () => {
+    // Per-link custom thumbnail takes priority
+    if (link.thumbnail_url) {
+      return (
+        <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl">
+          <Image
+            src={link.thumbnail_url}
+            alt=""
+            width={48}
+            height={48}
+            className="h-full w-full object-cover"
+          />
+        </div>
+      );
+    }
     if (isWhatsApp && avatarUrl) {
       return (
         <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl">
@@ -182,10 +196,22 @@ export function LinktreeLinkCard({
   };
 
   // ── Shared card classes ─────────────────────────────────────────────────────
+  // Use CSS variables for theming when variant is "secondary" (default white card)
+  const useCssVars = !isWhatsApp && link.variant === "secondary";
+  const cardStyle = useCssVars
+    ? {
+        backgroundColor: "var(--btn-bg, #1a1a1a)",
+        color: "var(--btn-text, #ffffff)",
+        borderRadius: "var(--btn-radius, 9999px)",
+        boxShadow: "var(--btn-shadow, none)",
+      }
+    : undefined;
+
   const cardClass = [
-    "flex items-center min-h-[68px] py-3 w-full rounded-2xl px-4",
+    "flex items-center min-h-[68px] py-3 w-full px-4",
     "transition-all duration-100",
     "active:scale-[0.97] active:shadow-none",
+    useCssVars ? "" : "rounded-2xl",
     styles.card,
   ].join(" ");
 
@@ -214,6 +240,7 @@ export function LinktreeLinkCard({
           openModal();
         }}
         className={cardClass}
+        style={cardStyle}
       >
         <LeftThumb />
         {label}
@@ -230,6 +257,7 @@ export function LinktreeLinkCard({
       rel="noopener noreferrer"
       onClick={track}
       className={cardClass}
+      style={cardStyle}
     >
       <LeftThumb />
       {label}

@@ -48,6 +48,8 @@ export function ThemeEditor({ profileId, theme }: ThemeEditorProps) {
       shadowIntensity: (theme?.shadow_intensity ?? DEFAULT_THEME.shadow_intensity) as "none" | "soft" | "medium" | "strong",
       layoutWidth: (theme?.layout_width ?? DEFAULT_THEME.layout_width) as "narrow" | "medium" | "wide",
       cardStyle: (theme?.card_style ?? DEFAULT_THEME.card_style) as "flat" | "elevated" | "bordered",
+      backgroundImageUrl: theme?.background_image_url ?? "",
+      backgroundType: (theme?.background_type ?? "color") as "color" | "image",
     },
   });
 
@@ -127,6 +129,57 @@ export function ThemeEditor({ profileId, theme }: ThemeEditorProps) {
                   />
                 ))}
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Fundo */}
+          <Card variant="elevated">
+            <CardHeader>
+              <CardTitle className="text-base">Plano de fundo</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="backgroundType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo de fundo</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="color">Cor sólida</SelectItem>
+                        <SelectItem value="image">Imagem</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+
+              {form.watch("backgroundType") === "image" && (
+                <FormField
+                  control={form.control}
+                  name="backgroundImageUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>URL da imagem de fundo</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="https://... (cole a URL da imagem)"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription className="text-[11px]">
+                        Faça upload em Arquivos e cole a URL pública aqui
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </CardContent>
           </Card>
 

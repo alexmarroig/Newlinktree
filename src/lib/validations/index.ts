@@ -80,6 +80,11 @@ export const linkSchema = z.object({
     .default("primary"),
   isEnabled: z.boolean().default(true),
   trackingEnabled: z.boolean().default(true),
+  thumbnailUrl: z
+    .string()
+    .url("URL da thumbnail inválida")
+    .optional()
+    .or(z.literal("")),
 });
 
 export type LinkSchema = z.infer<typeof linkSchema>;
@@ -130,6 +135,16 @@ export const profileSchema = z.object({
     .url("URL do site inválida")
     .optional()
     .or(z.literal("")),
+  linkedinUrl: z
+    .string()
+    .url("URL do LinkedIn inválida")
+    .optional()
+    .or(z.literal("")),
+  youtubeUrl: z
+    .string()
+    .url("URL do YouTube inválida")
+    .optional()
+    .or(z.literal("")),
 });
 
 export type ProfileSchema = z.infer<typeof profileSchema>;
@@ -137,6 +152,7 @@ export type ProfileSchema = z.infer<typeof profileSchema>;
 // ---- Theme ----
 
 export const themeSchema = z.object({
+  // Legacy HSL palette (kept for compat)
   primaryColor: z.string().min(1, "Cor primária é obrigatória"),
   secondaryColor: z.string().min(1, "Cor secundária é obrigatória"),
   backgroundColor: z.string().min(1, "Cor de fundo é obrigatória"),
@@ -148,6 +164,25 @@ export const themeSchema = z.object({
   shadowIntensity: z.enum(["none", "soft", "medium", "strong"]).default("soft"),
   layoutWidth: z.enum(["narrow", "medium", "wide"]).default("narrow"),
   cardStyle: z.enum(["flat", "elevated", "bordered"]).default("elevated"),
+  // Wallpaper
+  backgroundImageUrl: z.string().url().optional().or(z.literal("")),
+  backgroundType: z.enum(["color", "image"]).default("color"),
+  wallpaperEffect: z.enum(["none", "mono", "blur", "halftone"]).default("none"),
+  wallpaperTint: z.number().min(0).max(100).default(20),
+  wallpaperNoise: z.boolean().default(false),
+  // Text
+  pageFont: z.string().default("Inter"),
+  pageFontColor: z.string().optional().or(z.literal("")),
+  titleFontColor: z.string().optional().or(z.literal("")),
+  titleSize: z.enum(["small", "large"]).default("small"),
+  // Avatar / Header
+  avatarLayout: z.enum(["classic", "hero"]).default("classic"),
+  // Buttons
+  buttonStyle: z.enum(["solid", "glass", "outline"]).default("solid"),
+  buttonColor: z.string().optional().or(z.literal("")),
+  buttonTextColor: z.string().optional().or(z.literal("")),
+  buttonShadow: z.enum(["none", "soft", "strong", "hard"]).default("soft"),
+  buttonRoundness: z.enum(["square", "round", "rounder", "full"]).default("full"),
 });
 
 export type ThemeSchema = z.infer<typeof themeSchema>;
