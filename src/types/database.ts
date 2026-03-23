@@ -27,6 +27,8 @@ export type Database = {
           whatsapp_number: string | null;
           instagram_url: string | null;
           website_url: string | null;
+          linkedin_url: string | null;
+          youtube_url: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -42,6 +44,8 @@ export type Database = {
           whatsapp_number?: string | null;
           instagram_url?: string | null;
           website_url?: string | null;
+          linkedin_url?: string | null;
+          youtube_url?: string | null;
           created_at?: string;
           updated_at?: string;
         };

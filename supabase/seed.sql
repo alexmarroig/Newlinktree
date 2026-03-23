@@ -84,11 +84,11 @@ INSERT INTO public.pages (
   published_at
 ) VALUES (
   v_page_id, v_profile_id,
-  'ana-silva',
-  'Ana Clara Silva — Psicóloga Clínica',
+  'Camila-Freitas',
+  'Camila Freitas — Psicóloga Clínica',
   'published',
-  'Ana Clara Silva | Psicóloga Clínica em São Paulo',
-  'Psicóloga clínica especializada em ansiedade e autoconhecimento. Atendimentos online e presenciais em São Paulo. CRP 06/123456.',
+  'Camila Freitas | Psicóloga Clínica',
+  'Psicóloga clínica especializada em psicoterapia para adultos.',
   now()
 );
 
