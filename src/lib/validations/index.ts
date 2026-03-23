@@ -80,6 +80,11 @@ export const linkSchema = z.object({
     .default("primary"),
   isEnabled: z.boolean().default(true),
   trackingEnabled: z.boolean().default(true),
+  thumbnailUrl: z
+    .string()
+    .url("URL da thumbnail inválida")
+    .optional()
+    .or(z.literal("")),
 });
 
 export type LinkSchema = z.infer<typeof linkSchema>;
@@ -130,6 +135,16 @@ export const profileSchema = z.object({
     .url("URL do site inválida")
     .optional()
     .or(z.literal("")),
+  linkedinUrl: z
+    .string()
+    .url("URL do LinkedIn inválida")
+    .optional()
+    .or(z.literal("")),
+  youtubeUrl: z
+    .string()
+    .url("URL do YouTube inválida")
+    .optional()
+    .or(z.literal("")),
 });
 
 export type ProfileSchema = z.infer<typeof profileSchema>;
@@ -148,6 +163,12 @@ export const themeSchema = z.object({
   shadowIntensity: z.enum(["none", "soft", "medium", "strong"]).default("soft"),
   layoutWidth: z.enum(["narrow", "medium", "wide"]).default("narrow"),
   cardStyle: z.enum(["flat", "elevated", "bordered"]).default("elevated"),
+  backgroundImageUrl: z
+    .string()
+    .url("URL de imagem de fundo inválida")
+    .optional()
+    .or(z.literal("")),
+  backgroundType: z.enum(["color", "image"]).default("color"),
 });
 
 export type ThemeSchema = z.infer<typeof themeSchema>;

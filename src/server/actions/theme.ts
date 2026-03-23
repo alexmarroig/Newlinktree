@@ -40,6 +40,8 @@ export async function saveTheme(
         shadow_intensity: validation.data.shadowIntensity,
         layout_width: validation.data.layoutWidth,
         card_style: validation.data.cardStyle,
+        background_image_url: validation.data.backgroundImageUrl || null,
+        background_type: validation.data.backgroundType,
       },
       { onConflict: "profile_id" },
     );

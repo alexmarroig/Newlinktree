@@ -158,6 +158,20 @@ export function LinktreeLinkCard({
 
   // ── Left thumbnail ──────────────────────────────────────────────────────────
   const LeftThumb = () => {
+    // Per-link custom thumbnail takes priority
+    if (link.thumbnail_url) {
+      return (
+        <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl">
+          <Image
+            src={link.thumbnail_url}
+            alt=""
+            width={48}
+            height={48}
+            className="h-full w-full object-cover"
+          />
+        </div>
+      );
+    }
     if (isWhatsApp && avatarUrl) {
       return (
         <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl">

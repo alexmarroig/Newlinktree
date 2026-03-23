@@ -1,8 +1,10 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { saveSettings } from "@/server/actions/settings";
+import { uploadAvatar } from "@/server/actions/avatar";
 import { profileSchema, settingsSchema } from "@/lib/validations";
 import type { Profile, Settings } from "@/types";
 import { z } from "zod";
@@ -30,6 +33,12 @@ interface SettingsFormProps {
 }
 
 export function SettingsForm({ profile, settings }: SettingsFormProps) {
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(
+    profile.avatar_url ?? null,
+  );
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const form = useForm<CombinedSchema>({
     resolver: zodResolver(combinedSchema),
     defaultValues: {
@@ -41,6 +50,8 @@ export function SettingsForm({ profile, settings }: SettingsFormProps) {
       whatsappNumber: profile.whatsapp_number ?? "",
       instagramUrl: profile.instagram_url ?? "",
       websiteUrl: profile.website_url ?? "",
+      linkedinUrl: profile.linkedin_url ?? "",
+      youtubeUrl: profile.youtube_url ?? "",
       consentText:
         settings?.consent_text ??
         "Concordo com a política de privacidade e autorizo o contato.",
@@ -66,6 +77,37 @@ export function SettingsForm({ profile, settings }: SettingsFormProps) {
     toast.success("Configurações salvas com sucesso!");
   }
 
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Local preview
+    const objectUrl = URL.createObjectURL(file);
+    setAvatarPreview(objectUrl);
+
+    setUploadingAvatar(true);
+    const fd = new FormData();
+    fd.append("file", file);
+
+    const result = await uploadAvatar(profile.id, fd);
+    setUploadingAvatar(false);
+
+    if (!result.success) {
+      toast.error(result.error ?? "Erro ao enviar foto");
+      setAvatarPreview(profile.avatar_url ?? null);
+      return;
+    }
+
+    toast.success("Foto de perfil atualizada!");
+  }
+
+  const initials = profile.name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((n) => n[0]!.toUpperCase())
+    .join("");
+
   return (
     <div className="space-y-8">
       <div>
@@ -77,6 +119,55 @@ export function SettingsForm({ profile, settings }: SettingsFormProps) {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* Foto de perfil */}
+          <Card variant="elevated">
+            <CardHeader>
+              <CardTitle className="text-base">Foto de perfil</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-5">
+                <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-full ring-2 ring-border">
+                  {avatarPreview ? (
+                    <Image
+                      src={avatarPreview}
+                      alt="Avatar"
+                      width={80}
+                      height={80}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-stone-200">
+                      <span className="text-xl font-semibold text-stone-500">
+                        {initials}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp,image/avif"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    loading={uploadingAvatar}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {avatarPreview ? "Trocar foto" : "Adicionar foto"}
+                  </Button>
+                  <p className="text-[11px] text-muted-foreground">
+                    JPG, PNG, WebP ou AVIF · máx 5 MB
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Perfil */}
           <Card variant="elevated">
             <CardHeader>
@@ -172,6 +263,7 @@ export function SettingsForm({ profile, settings }: SettingsFormProps) {
                 )}
               />
 
+              {/* Redes sociais */}
               <div className="grid gap-4 sm:grid-cols-2">
                 <FormField
                   control={form.control}
@@ -198,6 +290,38 @@ export function SettingsForm({ profile, settings }: SettingsFormProps) {
                       <FormControl>
                         <Input
                           placeholder="https://seusite.com.br"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="linkedinUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>LinkedIn URL</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="https://linkedin.com/in/seuperfil"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="youtubeUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>YouTube URL</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="https://youtube.com/@seucanal"
                           {...field}
                         />
                       </FormControl>

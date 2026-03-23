@@ -66,6 +66,8 @@ export type Database = {
           shadow_intensity: string;
           layout_width: string;
           card_style: string;
+          background_image_url: string | null;
+          background_type: string;
           created_at: string;
           updated_at: string;
         };
@@ -83,6 +85,8 @@ export type Database = {
           shadow_intensity?: string;
           layout_width?: string;
           card_style?: string;
+          background_image_url?: string | null;
+          background_type?: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -166,6 +170,7 @@ export type Database = {
           is_enabled: boolean;
           tracking_enabled: boolean;
           click_count: number;
+          thumbnail_url: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -186,6 +191,7 @@ export type Database = {
           is_enabled?: boolean;
           tracking_enabled?: boolean;
           click_count?: number;
+          thumbnail_url?: string | null;
           created_at?: string;
           updated_at?: string;
         };

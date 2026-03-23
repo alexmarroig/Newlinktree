@@ -15,6 +15,8 @@ interface SaveSettingsParams {
   whatsappNumber?: string;
   instagramUrl?: string;
   websiteUrl?: string;
+  linkedinUrl?: string;
+  youtubeUrl?: string;
   consentText: string;
   timezone: string;
   locale: string;
@@ -48,6 +50,8 @@ export async function saveSettings(
       whatsapp_number: params.whatsappNumber || null,
       instagram_url: params.instagramUrl || null,
       website_url: params.websiteUrl || null,
+      linkedin_url: params.linkedinUrl || null,
+      youtube_url: params.youtubeUrl || null,
     })
     .eq("id", params.profileId)
     .eq("user_id", user.id);
