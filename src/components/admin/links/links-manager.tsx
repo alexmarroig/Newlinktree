@@ -1,10 +1,11 @@
 "use client";
 
-import { Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import Image from "next/image";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { createLink, toggleLink, deleteLink } from "@/server/actions/links";
+import { createLink, updateLink, toggleLink, deleteLink } from "@/server/actions/links";
 import { linkSchema, type LinkSchema } from "@/lib/validations";
 import type { Link } from "@/types";
 
@@ -71,11 +72,21 @@ const VARIANT_OPTIONS = [
   { value: "soft", label: "Suave" },
 ];
 
-export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps) {
-  const [links, setLinks] = useState(initialLinks);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+// ─── Link form (shared for create + edit) ─────────────────────────────────────
 
+function LinkForm({
+  defaultValues,
+  onSubmit,
+  onCancel,
+  isSubmitting,
+  mode,
+}: {
+  defaultValues: Partial<LinkSchema>;
+  onSubmit: (data: LinkSchema) => Promise<void>;
+  onCancel: () => void;
+  isSubmitting: boolean;
+  mode: "create" | "edit";
+}) {
   const form = useForm<LinkSchema>({
     resolver: zodResolver(linkSchema),
     defaultValues: {
@@ -89,15 +100,256 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
       isEnabled: true,
       trackingEnabled: true,
       thumbnailUrl: "",
+      customBgColor: "",
+      customTextColor: "",
+      customIcon: "",
+      ...defaultValues,
     },
   });
 
   const watchedType = form.watch("type");
+  const needsUrl = ["url", "instagram", "download"].includes(watchedType);
+  const needsWhatsapp = watchedType === "whatsapp";
 
-  function openCreateDialog() {
-    form.reset();
-    setDialogOpen(true);
-  }
+  return (
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      {/* Label */}
+      <div className="space-y-1.5">
+        <Label htmlFor="label">Texto do botão *</Label>
+        <Input
+          id="label"
+          placeholder="Ex: Falar no WhatsApp"
+          {...form.register("label")}
+        />
+        {form.formState.errors.label && (
+          <p className="text-xs text-destructive">{form.formState.errors.label.message}</p>
+        )}
+      </div>
+
+      {/* Sublabel */}
+      <div className="space-y-1.5">
+        <Label htmlFor="sublabel">Texto secundário</Label>
+        <Input
+          id="sublabel"
+          placeholder="Ex: Respondo em até 24h"
+          {...form.register("sublabel")}
+        />
+      </div>
+
+      {/* Tipo */}
+      <div className="space-y-1.5">
+        <Label>Tipo *</Label>
+        <Select
+          value={form.watch("type")}
+          onValueChange={(v) => form.setValue("type", v as LinkSchema["type"])}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione o tipo" />
+          </SelectTrigger>
+          <SelectContent>
+            {TYPE_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {form.formState.errors.type && (
+          <p className="text-xs text-destructive">{form.formState.errors.type.message}</p>
+        )}
+      </div>
+
+      {/* URL (condicional) */}
+      {needsUrl && (
+        <div className="space-y-1.5">
+          <Label htmlFor="url">
+            {watchedType === "download" ? "URL do arquivo" : "URL"}
+          </Label>
+          <Input
+            id="url"
+            type="url"
+            placeholder="https://..."
+            {...form.register("url")}
+          />
+          {form.formState.errors.url && (
+            <p className="text-xs text-destructive">{form.formState.errors.url.message}</p>
+          )}
+        </div>
+      )}
+
+      {/* Mensagem WhatsApp (condicional) */}
+      {needsWhatsapp && (
+        <div className="space-y-1.5">
+          <Label htmlFor="whatsappMessage">Mensagem pré-definida</Label>
+          <Input
+            id="whatsappMessage"
+            placeholder="Olá! Gostaria de saber mais..."
+            {...form.register("whatsappMessage")}
+          />
+        </div>
+      )}
+
+      {/* Variante */}
+      <div className="space-y-1.5">
+        <Label>Estilo visual</Label>
+        <Select
+          value={form.watch("variant")}
+          onValueChange={(v) => form.setValue("variant", v as LinkSchema["variant"])}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {VARIANT_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Thumbnail URL */}
+      <div className="space-y-1.5">
+        <Label htmlFor="thumbnailUrl">Imagem do botão (URL)</Label>
+        <div className="flex items-center gap-2">
+          {form.watch("thumbnailUrl") && (
+            <div className="h-9 w-9 shrink-0 overflow-hidden rounded-lg border">
+              <Image
+                src={form.watch("thumbnailUrl")!}
+                alt=""
+                width={36}
+                height={36}
+                className="h-full w-full object-cover"
+                onError={() => {}}
+              />
+            </div>
+          )}
+          <Input
+            id="thumbnailUrl"
+            type="url"
+            placeholder="https://... (opcional)"
+            {...form.register("thumbnailUrl")}
+            className="flex-1"
+          />
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Aparece como thumbnail à esquerda do botão. Use Arquivos para fazer upload.
+        </p>
+      </div>
+
+      {/* Custom colors */}
+      <div className="space-y-2">
+        <Label>Cores personalizadas</Label>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="customBgColor" className="text-xs text-muted-foreground">
+              Fundo do botão
+            </Label>
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-white px-2 py-1.5">
+              <input
+                type="color"
+                value={form.watch("customBgColor") || "#1a1a1a"}
+                onChange={(e) => form.setValue("customBgColor", e.target.value)}
+                className="h-6 w-6 cursor-pointer rounded border-0 bg-transparent p-0"
+              />
+              <input
+                type="text"
+                placeholder="Padrão"
+                value={form.watch("customBgColor") || ""}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === "" || /^#[0-9a-fA-F]{0,6}$/.test(v)) form.setValue("customBgColor", v);
+                }}
+                className="flex-1 bg-transparent text-xs font-mono outline-none"
+              />
+              {form.watch("customBgColor") && (
+                <button type="button" onClick={() => form.setValue("customBgColor", "")} className="text-muted-foreground hover:text-foreground text-xs">✕</button>
+              )}
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="customTextColor" className="text-xs text-muted-foreground">
+              Cor do texto/ícone
+            </Label>
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-white px-2 py-1.5">
+              <input
+                type="color"
+                value={form.watch("customTextColor") || "#ffffff"}
+                onChange={(e) => form.setValue("customTextColor", e.target.value)}
+                className="h-6 w-6 cursor-pointer rounded border-0 bg-transparent p-0"
+              />
+              <input
+                type="text"
+                placeholder="Padrão"
+                value={form.watch("customTextColor") || ""}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === "" || /^#[0-9a-fA-F]{0,6}$/.test(v)) form.setValue("customTextColor", v);
+                }}
+                className="flex-1 bg-transparent text-xs font-mono outline-none"
+              />
+              {form.watch("customTextColor") && (
+                <button type="button" onClick={() => form.setValue("customTextColor", "")} className="text-muted-foreground hover:text-foreground text-xs">✕</button>
+              )}
+            </div>
+          </div>
+        </div>
+        {(form.watch("customBgColor") || form.watch("customTextColor")) && (
+          <div
+            className="flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold"
+            style={{
+              backgroundColor: form.watch("customBgColor") || "#1a1a1a",
+              color: form.watch("customTextColor") || "#ffffff",
+            }}
+          >
+            {form.watch("label") || "Prévia do botão"}
+          </div>
+        )}
+        <p className="text-[11px] text-muted-foreground">
+          Deixe em branco para usar as cores do tema global.
+        </p>
+      </div>
+
+      {/* Toggles */}
+      <div className="space-y-3 rounded-xl bg-muted/40 p-3">
+        <div className="flex items-center justify-between">
+          <Label className="font-normal">Ativo na página</Label>
+          <Switch
+            checked={form.watch("isEnabled")}
+            onCheckedChange={(v) => form.setValue("isEnabled", v)}
+          />
+        </div>
+        {needsUrl && (
+          <div className="flex items-center justify-between">
+            <Label className="font-normal">Abrir em nova aba</Label>
+            <Switch
+              checked={form.watch("openInNewTab")}
+              onCheckedChange={(v) => form.setValue("openInNewTab", v)}
+            />
+          </div>
+        )}
+      </div>
+
+      <DialogFooter>
+        <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Salvando..." : mode === "create" ? "Criar link" : "Salvar alterações"}
+        </Button>
+      </DialogFooter>
+    </form>
+  );
+}
+
+// ─── Main component ─────────────────────────────────────────────────────────
+
+export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps) {
+  const [links, setLinks] = useState(initialLinks);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editingLink, setEditingLink] = useState<Link | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleCreate(data: LinkSchema) {
     setIsSubmitting(true);
@@ -106,9 +358,26 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
       if (result.success) {
         setLinks((prev) => [...prev, result.data]);
         toast.success("Link criado com sucesso");
-        setDialogOpen(false);
+        setCreateOpen(false);
       } else {
         toast.error(result.error ?? "Erro ao criar link");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleEdit(data: LinkSchema) {
+    if (!editingLink) return;
+    setIsSubmitting(true);
+    try {
+      const result = await updateLink(editingLink.id, data);
+      if (result.success) {
+        setLinks((prev) => prev.map((l) => (l.id === editingLink.id ? result.data : l)));
+        toast.success("Link atualizado");
+        setEditingLink(null);
+      } else {
+        toast.error(result.error ?? "Erro ao atualizar link");
       }
     } finally {
       setIsSubmitting(false);
@@ -119,9 +388,7 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
     const result = await toggleLink(linkId);
     if (result.success) {
       setLinks((prev) =>
-        prev.map((l) =>
-          l.id === linkId ? { ...l, is_enabled: !l.is_enabled } : l,
-        ),
+        prev.map((l) => (l.id === linkId ? { ...l, is_enabled: !l.is_enabled } : l)),
       );
     } else {
       toast.error("Erro ao atualizar link");
@@ -139,8 +406,24 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
     }
   }
 
-  const needsUrl = ["url", "instagram", "download"].includes(watchedType);
-  const needsWhatsapp = watchedType === "whatsapp";
+  // Map Link → LinkSchema defaults for edit dialog
+  function linkToDefaults(link: Link): Partial<LinkSchema> {
+    return {
+      label: link.label,
+      sublabel: link.sublabel ?? "",
+      type: link.type as LinkSchema["type"],
+      url: link.url ?? "",
+      whatsappMessage: link.whatsapp_message ?? "",
+      openInNewTab: link.open_in_new_tab,
+      variant: link.variant as LinkSchema["variant"],
+      isEnabled: link.is_enabled,
+      trackingEnabled: link.tracking_enabled,
+      thumbnailUrl: link.thumbnail_url ?? "",
+      customBgColor: link.custom_bg_color ?? "",
+      customTextColor: link.custom_text_color ?? "",
+      customIcon: link.custom_icon ?? "",
+    };
+  }
 
   return (
     <div className="space-y-6">
@@ -151,7 +434,7 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
             Gerencie os botões e links da sua página
           </p>
         </div>
-        <Button size="sm" onClick={openCreateDialog}>
+        <Button size="sm" onClick={() => setCreateOpen(true)}>
           <Plus className="h-4 w-4" />
           Novo link
         </Button>
@@ -181,8 +464,21 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
                     {link.position + 1}
                   </span>
 
+                  {/* Thumbnail preview */}
+                  {link.thumbnail_url && (
+                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg border">
+                      <Image
+                        src={link.thumbnail_url}
+                        alt=""
+                        width={40}
+                        height={40}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  )}
+
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <p className="truncate text-sm font-semibold text-foreground">
                         {link.label}
                       </p>
@@ -191,11 +487,9 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
                       </Badge>
                     </div>
                     {link.sublabel && (
-                      <p className="truncate text-xs text-muted-foreground">
-                        {link.sublabel}
-                      </p>
+                      <p className="truncate text-xs text-muted-foreground">{link.sublabel}</p>
                     )}
-                    <div className="mt-1 flex items-center gap-2">
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
                       <Badge variant="outline" className="text-[10px]">
                         {TYPE_LABELS[link.type] ?? link.type}
                       </Badge>
@@ -204,10 +498,24 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
                           {link.click_count} clique{link.click_count !== 1 ? "s" : ""}
                         </span>
                       )}
+                      {link.url && (
+                        <span className="max-w-[200px] truncate text-[11px] text-muted-foreground">
+                          {link.url}
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  <div className="flex shrink-0 items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => setEditingLink(link)}
+                      className="text-muted-foreground hover:text-foreground"
+                      title="Editar"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
                     <Switch
                       checked={link.is_enabled}
                       onCheckedChange={() => handleToggle(link.id)}
@@ -218,6 +526,7 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
                       size="icon-sm"
                       onClick={() => handleDelete(link.id)}
                       className="text-muted-foreground hover:text-destructive"
+                      title="Deletar"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
@@ -229,158 +538,37 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
         </CardContent>
       </Card>
 
-      {/* ---- Dialog: criar novo link ---- */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md">
+      {/* ── Dialog: criar link ── */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Novo link</DialogTitle>
           </DialogHeader>
+          <LinkForm
+            defaultValues={{}}
+            onSubmit={handleCreate}
+            onCancel={() => setCreateOpen(false)}
+            isSubmitting={isSubmitting}
+            mode="create"
+          />
+        </DialogContent>
+      </Dialog>
 
-          <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
-            {/* Label */}
-            <div className="space-y-1.5">
-              <Label htmlFor="label">Texto do botão *</Label>
-              <Input
-                id="label"
-                placeholder="Ex: Falar no WhatsApp"
-                {...form.register("label")}
-              />
-              {form.formState.errors.label && (
-                <p className="text-xs text-destructive">{form.formState.errors.label.message}</p>
-              )}
-            </div>
-
-            {/* Sublabel */}
-            <div className="space-y-1.5">
-              <Label htmlFor="sublabel">Texto secundário</Label>
-              <Input
-                id="sublabel"
-                placeholder="Ex: Respondo em até 24h"
-                {...form.register("sublabel")}
-              />
-            </div>
-
-            {/* Tipo */}
-            <div className="space-y-1.5">
-              <Label>Tipo *</Label>
-              <Select
-                value={form.watch("type")}
-                onValueChange={(v) => form.setValue("type", v as LinkSchema["type"])}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TYPE_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {form.formState.errors.type && (
-                <p className="text-xs text-destructive">{form.formState.errors.type.message}</p>
-              )}
-            </div>
-
-            {/* URL (condicional) */}
-            {needsUrl && (
-              <div className="space-y-1.5">
-                <Label htmlFor="url">
-                  {watchedType === "download" ? "URL do arquivo" : "URL"}
-                </Label>
-                <Input
-                  id="url"
-                  type="url"
-                  placeholder="https://..."
-                  {...form.register("url")}
-                />
-                {form.formState.errors.url && (
-                  <p className="text-xs text-destructive">{form.formState.errors.url.message}</p>
-                )}
-              </div>
-            )}
-
-            {/* Mensagem WhatsApp (condicional) */}
-            {needsWhatsapp && (
-              <div className="space-y-1.5">
-                <Label htmlFor="whatsappMessage">Mensagem pré-definida</Label>
-                <Input
-                  id="whatsappMessage"
-                  placeholder="Olá! Gostaria de saber mais..."
-                  {...form.register("whatsappMessage")}
-                />
-              </div>
-            )}
-
-            {/* Variante */}
-            <div className="space-y-1.5">
-              <Label>Estilo visual</Label>
-              <Select
-                value={form.watch("variant")}
-                onValueChange={(v) => form.setValue("variant", v as LinkSchema["variant"])}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {VARIANT_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Thumbnail URL */}
-            <div className="space-y-1.5">
-              <Label htmlFor="thumbnailUrl">Imagem do botão (URL)</Label>
-              <Input
-                id="thumbnailUrl"
-                type="url"
-                placeholder="https://... (opcional)"
-                {...form.register("thumbnailUrl")}
-              />
-              <p className="text-[11px] text-muted-foreground">
-                Cole a URL de uma imagem para aparecer ao lado do botão. Use Arquivos para fazer upload.
-              </p>
-            </div>
-
-            {/* Toggles */}
-            <div className="space-y-3 rounded-xl bg-muted/40 p-3">
-              <div className="flex items-center justify-between">
-                <Label className="font-normal">Ativo na página</Label>
-                <Switch
-                  checked={form.watch("isEnabled")}
-                  onCheckedChange={(v) => form.setValue("isEnabled", v)}
-                />
-              </div>
-              {needsUrl && (
-                <div className="flex items-center justify-between">
-                  <Label className="font-normal">Abrir em nova aba</Label>
-                  <Switch
-                    checked={form.watch("openInNewTab")}
-                    onCheckedChange={(v) => form.setValue("openInNewTab", v)}
-                  />
-                </div>
-              )}
-            </div>
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setDialogOpen(false)}
-                disabled={isSubmitting}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Criando..." : "Criar link"}
-              </Button>
-            </DialogFooter>
-          </form>
+      {/* ── Dialog: editar link ── */}
+      <Dialog open={!!editingLink} onOpenChange={(o) => { if (!o) setEditingLink(null); }}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar link</DialogTitle>
+          </DialogHeader>
+          {editingLink && (
+            <LinkForm
+              defaultValues={linkToDefaults(editingLink)}
+              onSubmit={handleEdit}
+              onCancel={() => setEditingLink(null)}
+              isSubmitting={isSubmitting}
+              mode="edit"
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>

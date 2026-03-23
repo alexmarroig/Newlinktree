@@ -64,6 +64,9 @@ export async function createLink(
       is_enabled: data.isEnabled,
       tracking_enabled: data.trackingEnabled,
       thumbnail_url: data.thumbnailUrl || null,
+      custom_bg_color: data.customBgColor || null,
+      custom_text_color: data.customTextColor || null,
+      custom_icon: data.customIcon || null,
       position,
       click_count: 0,
     })
@@ -139,6 +142,55 @@ export async function deleteLink(linkId: string): Promise<ApiResponse> {
 
   revalidatePath("/admin/links");
   return { success: true, data: undefined };
+}
+
+export async function updateLink(
+  linkId: string,
+  input: unknown,
+): Promise<ApiResponse<Link>> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { success: false, error: "Não autorizado" };
+
+  const parsed = linkSchema.safeParse(input);
+  if (!parsed.success) {
+    const firstError = parsed.error.errors[0];
+    return { success: false, error: firstError?.message ?? "Dados inválidos" };
+  }
+
+  const data = parsed.data;
+
+  const { data: updatedLink, error } = await supabase
+    .from("links")
+    .update({
+      label: data.label,
+      sublabel: data.sublabel ?? null,
+      type: data.type,
+      icon: data.icon ?? null,
+      url: data.url ?? null,
+      whatsapp_message: data.whatsappMessage ?? null,
+      open_in_new_tab: data.openInNewTab,
+      variant: data.variant,
+      is_enabled: data.isEnabled,
+      tracking_enabled: data.trackingEnabled,
+      thumbnail_url: data.thumbnailUrl || null,
+      custom_bg_color: data.customBgColor || null,
+      custom_text_color: data.customTextColor || null,
+      custom_icon: data.customIcon || null,
+    })
+    .eq("id", linkId)
+    .select()
+    .single();
+
+  if (error || !updatedLink) {
+    return { success: false, error: "Erro ao atualizar link" };
+  }
+
+  revalidatePath("/admin/links");
+  return { success: true, data: updatedLink as Link };
 }
 
 export async function setLinkThumbnail(

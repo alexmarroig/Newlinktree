@@ -85,6 +85,9 @@ export const linkSchema = z.object({
     .url("URL da thumbnail inválida")
     .optional()
     .or(z.literal("")),
+  customBgColor: z.string().optional().or(z.literal("")),
+  customTextColor: z.string().optional().or(z.literal("")),
+  customIcon: z.string().optional().or(z.literal("")),
 });
 
 export type LinkSchema = z.infer<typeof linkSchema>;
@@ -183,6 +186,7 @@ export const themeSchema = z.object({
   buttonTextColor: z.string().optional().or(z.literal("")),
   buttonShadow: z.enum(["none", "soft", "strong", "hard"]).default("soft"),
   buttonRoundness: z.enum(["square", "round", "rounder", "full"]).default("full"),
+  buttonAnimation: z.enum(["none", "shake", "pulse", "bounce"]).default("none"),
 });
 
 export type ThemeSchema = z.infer<typeof themeSchema>;
