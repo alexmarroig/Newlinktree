@@ -34,6 +34,18 @@ const nextConfig: NextConfig = {
       "recharts",
     ],
   },
+  async redirects() {
+    return [
+      // Fallback: se o Supabase Site URL estiver configurado com o slug,
+      // redireciona /{slug}/auth/* → /auth/*
+      {
+        source: "/:slug/auth/:path*",
+        destination: "/auth/:path*",
+        permanent: false,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {
