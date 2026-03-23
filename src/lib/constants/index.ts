@@ -3,7 +3,7 @@ export const APP_NAME = "Therapy Bio Hub";
 export const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 export const DEFAULT_SLUG =
-  process.env.NEXT_PUBLIC_DEFAULT_SLUG ?? "ana-silva";
+  process.env.NEXT_PUBLIC_DEFAULT_SLUG ?? "Camila-Freitas";
 
 // ---- Supabase Storage Buckets ----
 export const STORAGE_BUCKET_AVATARS = "avatars";

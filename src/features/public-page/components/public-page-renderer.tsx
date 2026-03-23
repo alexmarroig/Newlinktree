@@ -30,42 +30,64 @@ export function PublicPageRenderer({ data }: PublicPageRendererProps) {
             {/* ── HEADER ── */}
             <header className="mb-8 flex flex-col items-center text-center">
               {/* Avatar */}
-              <div className="mb-4 h-24 w-24 overflow-hidden rounded-full ring-4 ring-white shadow-md">
+              <div className="mb-4 h-28 w-28 overflow-hidden rounded-full ring-4 ring-white shadow-md">
                 {profile.avatar_url ? (
                   <Image
                     src={profile.avatar_url}
                     alt={profile.name}
-                    width={96}
-                    height={96}
+                    width={112}
+                    height={112}
                     className="h-full w-full object-cover"
                     priority
                   />
                 ) : (
-                  <div className="h-full w-full bg-stone-300" />
+                  <div className="flex h-full w-full items-center justify-center bg-stone-200">
+                    <span className="select-none text-2xl font-semibold text-stone-500">
+                      {profile.name
+                        .split(" ")
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .map((n) => n[0]!.toUpperCase())
+                        .join("")}
+                    </span>
+                  </div>
                 )}
               </div>
 
-              {/* Name + professional title */}
+              {/* Name */}
               <h1 className="text-[22px] font-bold leading-tight text-gray-900">
-                {profile.name} | {profile.professional_title}
+                {profile.name}
               </h1>
 
-              {/* CRP */}
+              {/* Professional title */}
+              {profile.professional_title && (
+                <p className="mt-0.5 text-sm font-medium text-gray-600">
+                  {profile.professional_title}
+                </p>
+              )}
+
+              {/* CRP badge */}
               {profile.crp && (
-                <p className="mt-1 text-sm text-gray-600">{profile.crp}</p>
+                <div className="mt-2">
+                  <span className="inline-flex items-center rounded-full border border-stone-200 bg-stone-100 px-2.5 py-0.5 text-xs font-medium text-stone-600">
+                    {profile.crp}
+                  </span>
+                </div>
               )}
 
               {/* Subtitle — specialties */}
               {profile.subtitle && (
-                <p className="mt-1 text-sm font-medium text-gray-700">
+                <p className="mt-2 text-sm font-medium text-gray-700">
                   {profile.subtitle}
                 </p>
               )}
 
-              {/* Modality */}
-              <p className="mt-1 text-xs text-gray-500">
-                Atendimento online e presencial
-              </p>
+              {/* Bio — editable via admin, replaces hardcoded modality text */}
+              {profile.bio && (
+                <p className="mt-2 max-w-[320px] px-2 text-sm leading-relaxed text-gray-500">
+                  {profile.bio}
+                </p>
+              )}
             </header>
 
             {/* ── LINK CARDS ── */}
