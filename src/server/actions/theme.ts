@@ -55,6 +55,7 @@ export async function saveTheme(
         button_text_color: validation.data.buttonTextColor || null,
         button_shadow: validation.data.buttonShadow,
         button_roundness: validation.data.buttonRoundness,
+        button_animation: validation.data.buttonAnimation,
       },
       { onConflict: "profile_id" },
     );

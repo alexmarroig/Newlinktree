@@ -81,6 +81,7 @@ export type Database = {
           title_font_color: string | null;
           page_text_color: string | null;
           page_font: string;
+          button_animation: string;
           created_at: string;
           updated_at: string;
         };
@@ -105,6 +106,7 @@ export type Database = {
           button_text_color?: string | null;
           button_shadow?: string;
           button_roundness?: string;
+          button_animation?: string;
           wallpaper_effect?: string;
           wallpaper_tint?: number;
           wallpaper_noise?: boolean;

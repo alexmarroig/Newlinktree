@@ -208,7 +208,7 @@ export function LinktreeLinkCard({
     : undefined;
 
   const cardClass = [
-    "flex items-center min-h-[68px] py-3 w-full px-4",
+    "link-card flex items-center min-h-[68px] py-3 w-full px-4",
     "transition-all duration-100",
     "active:scale-[0.97] active:shadow-none",
     useCssVars ? "" : "rounded-2xl",

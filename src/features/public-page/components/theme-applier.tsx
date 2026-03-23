@@ -35,12 +35,45 @@ export function ThemeApplier({ theme }: ThemeApplierProps) {
   };
   const btnShadow = shadowMap[theme.button_shadow ?? "soft"] ?? shadowMap.soft;
 
-  // Button background color
-  const btnBg = theme.button_color
-    ? theme.button_color
-    : `hsl(${theme.primary_color})`;
+  // Button background color — fallback to dark #1a1a1a, never the brownish HSL primary
+  const btnBg = theme.button_color || "#1a1a1a";
 
   const btnText = theme.button_text_color ?? "#ffffff";
+
+  // Button animation
+  const btnAnimation = theme.button_animation ?? "none";
+  const animationCss =
+    btnAnimation === "none"
+      ? ""
+      : btnAnimation === "shake"
+        ? `
+    @keyframes btn-shake {
+      0%, 100% { transform: translateX(0); }
+      15% { transform: translateX(-4px) rotate(-1deg); }
+      30% { transform: translateX(4px) rotate(1deg); }
+      45% { transform: translateX(-3px); }
+      60% { transform: translateX(3px); }
+      75% { transform: translateX(-2px); }
+    }
+    .link-card { animation: btn-shake 2.8s ease-in-out infinite; }
+    `
+        : btnAnimation === "pulse"
+          ? `
+    @keyframes btn-pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0,0,0,0.15); }
+      50% { transform: scale(1.025); box-shadow: 0 0 0 6px rgba(0,0,0,0); }
+    }
+    .link-card { animation: btn-pulse 2s ease-in-out infinite; }
+    `
+          : btnAnimation === "bounce"
+            ? `
+    @keyframes btn-bounce {
+      0%, 100% { transform: translateY(0); animation-timing-function: cubic-bezier(0.8,0,1,1); }
+      50% { transform: translateY(-5px); animation-timing-function: cubic-bezier(0,0,0.2,1); }
+    }
+    .link-card { animation: btn-bounce 1.6s infinite; }
+    `
+            : "";
 
   // Wallpaper effect (mono, blur)
   let pageFilter = "none";
@@ -101,6 +134,8 @@ export function ThemeApplier({ theme }: ThemeApplierProps) {
         ? `.public-bg-img { background-image: url('${theme.background_image_url ?? ""}'), url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E"); }`
         : ""
     }
+
+    ${animationCss}
   `;
 
   return <style dangerouslySetInnerHTML={{ __html: css }} />;

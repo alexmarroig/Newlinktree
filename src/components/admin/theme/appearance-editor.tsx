@@ -228,11 +228,11 @@ function VisualOption({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex flex-col items-center gap-1.5 rounded-xl border-2 p-3 transition-all",
+        "flex flex-col items-center gap-1.5 rounded-xl border-2 p-3 transition-all duration-150 cursor-pointer",
         active
           ? "border-gray-900 bg-white shadow-sm"
-          : "border-transparent bg-gray-100 opacity-70 hover:opacity-90",
-        locked && "cursor-not-allowed opacity-50",
+          : "border-transparent bg-gray-100 hover:border-gray-300 hover:bg-white hover:shadow-sm hover:scale-[1.03]",
+        locked && "cursor-not-allowed opacity-50 hover:scale-100 hover:border-transparent hover:bg-gray-100 hover:shadow-none",
       )}
       disabled={locked}
     >
@@ -286,6 +286,7 @@ export function AppearanceEditor({
       buttonTextColor: theme?.button_text_color ?? "",
       buttonShadow: (theme?.button_shadow ?? "soft") as ThemeSchema["buttonShadow"],
       buttonRoundness: (theme?.button_roundness ?? "full") as ThemeSchema["buttonRoundness"],
+      buttonAnimation: (theme?.button_animation ?? "none") as ThemeSchema["buttonAnimation"],
     },
   });
 
@@ -652,6 +653,31 @@ export function AppearanceEditor({
               </VisualOption>
             ))}
           </div>
+        </div>
+
+        {/* Animation */}
+        <div className="space-y-3">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-500">Animação (atenção)</p>
+          <div className="flex gap-2 flex-wrap">
+            {([
+              { id: "none", label: "Nenhuma", emoji: "–" },
+              { id: "shake", label: "Shake", emoji: "↔" },
+              { id: "pulse", label: "Pulse", emoji: "◎" },
+              { id: "bounce", label: "Bounce", emoji: "↕" },
+            ] as const).map((opt) => (
+              <VisualOption
+                key={opt.id}
+                active={watch("buttonAnimation") === opt.id}
+                onClick={() => setValue("buttonAnimation", opt.id)}
+                label={opt.label}
+              >
+                <span className="text-lg leading-none">{opt.emoji}</span>
+              </VisualOption>
+            ))}
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Anima os botões da página para chamar atenção dos visitantes
+          </p>
         </div>
 
         {/* Button color */}
