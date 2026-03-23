@@ -1,8 +1,10 @@
 import { unstable_cache } from "next/cache";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { PAGE_CACHE_TAG_PREFIX } from "@/lib/constants";
 import type { PageData } from "@/types";
+import type { Database } from "@/types/database";
 
 /**
  * Carrega todos os dados necessários para renderizar a página pública.
@@ -13,7 +15,12 @@ export async function getPublicPageData(
 ): Promise<PageData | null> {
   return unstable_cache(
     async () => {
-      const supabase = await createClient();
+      // Use plain client without cookies — public data doesn't need user session,
+      // and cookies() cannot be called inside unstable_cache in Next.js 15.
+      const supabase = createSupabaseClient<Database>(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      );
 
       // Carrega a página
       const { data: page, error: pageError } = await supabase
