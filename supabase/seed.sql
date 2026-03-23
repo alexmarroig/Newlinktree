@@ -10,7 +10,7 @@
 -- Variáveis (substitua pelos valores reais)
 DO $$
 DECLARE
-  v_user_id     UUID := 'SUBSTITUA-PELO-UUID-DO-USUARIO-AUTH';
+  v_user_id     UUID := '619d28a3-89c9-414c-be64-ea3bd98c6f70';
   v_profile_id  UUID := gen_random_uuid();
   v_page_id     UUID := gen_random_uuid();
   v_theme_id    UUID := gen_random_uuid();
@@ -84,11 +84,11 @@ INSERT INTO public.pages (
   published_at
 ) VALUES (
   v_page_id, v_profile_id,
-  'ana-silva',
-  'Ana Clara Silva — Psicóloga Clínica',
+  'Camila-Freitas',
+  'Camila Freitas — Psicóloga Clínica',
   'published',
-  'Ana Clara Silva | Psicóloga Clínica em São Paulo',
-  'Psicóloga clínica especializada em ansiedade e autoconhecimento. Atendimentos online e presenciais em São Paulo. CRP 06/123456.',
+  'Camila Freitas | Psicóloga Clínica',
+  'Psicóloga clínica especializada em psicoterapia para adultos.',
   now()
 );
 
