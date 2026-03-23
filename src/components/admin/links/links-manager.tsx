@@ -100,6 +100,9 @@ function LinkForm({
       isEnabled: true,
       trackingEnabled: true,
       thumbnailUrl: "",
+      customBgColor: "",
+      customTextColor: "",
+      customIcon: "",
       ...defaultValues,
     },
   });
@@ -235,6 +238,79 @@ function LinkForm({
         </p>
       </div>
 
+      {/* Custom colors */}
+      <div className="space-y-2">
+        <Label>Cores personalizadas</Label>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="customBgColor" className="text-xs text-muted-foreground">
+              Fundo do botão
+            </Label>
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-white px-2 py-1.5">
+              <input
+                type="color"
+                value={form.watch("customBgColor") || "#1a1a1a"}
+                onChange={(e) => form.setValue("customBgColor", e.target.value)}
+                className="h-6 w-6 cursor-pointer rounded border-0 bg-transparent p-0"
+              />
+              <input
+                type="text"
+                placeholder="Padrão"
+                value={form.watch("customBgColor") || ""}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === "" || /^#[0-9a-fA-F]{0,6}$/.test(v)) form.setValue("customBgColor", v);
+                }}
+                className="flex-1 bg-transparent text-xs font-mono outline-none"
+              />
+              {form.watch("customBgColor") && (
+                <button type="button" onClick={() => form.setValue("customBgColor", "")} className="text-muted-foreground hover:text-foreground text-xs">✕</button>
+              )}
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="customTextColor" className="text-xs text-muted-foreground">
+              Cor do texto/ícone
+            </Label>
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-white px-2 py-1.5">
+              <input
+                type="color"
+                value={form.watch("customTextColor") || "#ffffff"}
+                onChange={(e) => form.setValue("customTextColor", e.target.value)}
+                className="h-6 w-6 cursor-pointer rounded border-0 bg-transparent p-0"
+              />
+              <input
+                type="text"
+                placeholder="Padrão"
+                value={form.watch("customTextColor") || ""}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === "" || /^#[0-9a-fA-F]{0,6}$/.test(v)) form.setValue("customTextColor", v);
+                }}
+                className="flex-1 bg-transparent text-xs font-mono outline-none"
+              />
+              {form.watch("customTextColor") && (
+                <button type="button" onClick={() => form.setValue("customTextColor", "")} className="text-muted-foreground hover:text-foreground text-xs">✕</button>
+              )}
+            </div>
+          </div>
+        </div>
+        {(form.watch("customBgColor") || form.watch("customTextColor")) && (
+          <div
+            className="flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold"
+            style={{
+              backgroundColor: form.watch("customBgColor") || "#1a1a1a",
+              color: form.watch("customTextColor") || "#ffffff",
+            }}
+          >
+            {form.watch("label") || "Prévia do botão"}
+          </div>
+        )}
+        <p className="text-[11px] text-muted-foreground">
+          Deixe em branco para usar as cores do tema global.
+        </p>
+      </div>
+
       {/* Toggles */}
       <div className="space-y-3 rounded-xl bg-muted/40 p-3">
         <div className="flex items-center justify-between">
@@ -343,6 +419,9 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
       isEnabled: link.is_enabled,
       trackingEnabled: link.tracking_enabled,
       thumbnailUrl: link.thumbnail_url ?? "",
+      customBgColor: link.custom_bg_color ?? "",
+      customTextColor: link.custom_text_color ?? "",
+      customIcon: link.custom_icon ?? "",
     };
   }
 

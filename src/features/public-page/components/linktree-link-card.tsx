@@ -186,6 +186,14 @@ export function LinktreeLinkCard({
       );
     }
     const { Icon } = iconConfig;
+    // When using inline colors, show a semi-transparent white icon bg
+    if (useInlineColor) {
+      return (
+        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-white/20">
+          <Icon className="h-5 w-5" style={{ color: "inherit" }} />
+        </div>
+      );
+    }
     return (
       <div
         className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl ${styles.iconBg}`}
@@ -195,33 +203,51 @@ export function LinktreeLinkCard({
     );
   };
 
-  // ── Shared card classes ─────────────────────────────────────────────────────
+  // ── Custom per-link colors override everything ───────────────────────────────
+  const hasCustomColors = !isWhatsApp && (link.custom_bg_color || link.custom_text_color);
+
   // Use CSS variables for theming when variant is "secondary" (default white card)
-  const useCssVars = !isWhatsApp && link.variant === "secondary";
-  const cardStyle = useCssVars
+  const useCssVars = !isWhatsApp && !hasCustomColors && link.variant === "secondary";
+
+  const cardStyle: React.CSSProperties | undefined = hasCustomColors
     ? {
-        backgroundColor: "var(--btn-bg, #1a1a1a)",
-        color: "var(--btn-text, #ffffff)",
+        backgroundColor: link.custom_bg_color ?? undefined,
+        color: link.custom_text_color ?? undefined,
         borderRadius: "var(--btn-radius, 9999px)",
         boxShadow: "var(--btn-shadow, none)",
       }
-    : undefined;
+    : useCssVars
+      ? {
+          backgroundColor: "var(--btn-bg, #1a1a1a)",
+          color: "var(--btn-text, #ffffff)",
+          borderRadius: "var(--btn-radius, 9999px)",
+          boxShadow: "var(--btn-shadow, none)",
+        }
+      : undefined;
+
+  // When inline style sets color, Tailwind text-* classes would override it — skip them
+  const useInlineColor = hasCustomColors || useCssVars;
 
   const cardClass = [
     "link-card flex items-center min-h-[68px] py-3 w-full px-4",
     "transition-all duration-100",
     "active:scale-[0.97] active:shadow-none",
-    useCssVars ? "" : "rounded-2xl",
-    styles.card,
-  ].join(" ");
+    useInlineColor ? "" : "rounded-2xl",
+    useInlineColor ? "" : styles.card,
+    !useInlineColor ? styles.card : "",
+  ].join(" ").replace(/\s+/g, " ").trim();
 
   const label = (
     <div className="flex flex-1 flex-col items-center justify-center text-center">
-      <span className={`text-[13px] font-semibold uppercase tracking-wide ${styles.text}`}>
+      <span
+        className={`text-[13px] font-semibold uppercase tracking-wide ${useInlineColor ? "" : styles.text}`}
+      >
         {link.label}
       </span>
       {link.sublabel && (
-        <span className={`mt-0.5 text-[11px] font-normal ${styles.subtext}`}>
+        <span
+          className={`mt-0.5 text-[11px] font-normal ${useInlineColor ? "opacity-75" : styles.subtext}`}
+        >
           {link.sublabel}
         </span>
       )}

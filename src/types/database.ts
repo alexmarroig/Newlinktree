@@ -199,6 +199,9 @@ export type Database = {
           tracking_enabled: boolean;
           click_count: number;
           thumbnail_url: string | null;
+          custom_bg_color: string | null;
+          custom_text_color: string | null;
+          custom_icon: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -220,6 +223,9 @@ export type Database = {
           tracking_enabled?: boolean;
           click_count?: number;
           thumbnail_url?: string | null;
+          custom_bg_color?: string | null;
+          custom_text_color?: string | null;
+          custom_icon?: string | null;
           created_at?: string;
           updated_at?: string;
         };

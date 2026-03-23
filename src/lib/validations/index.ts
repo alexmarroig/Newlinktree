@@ -85,6 +85,9 @@ export const linkSchema = z.object({
     .url("URL da thumbnail inválida")
     .optional()
     .or(z.literal("")),
+  customBgColor: z.string().optional().or(z.literal("")),
+  customTextColor: z.string().optional().or(z.literal("")),
+  customIcon: z.string().optional().or(z.literal("")),
 });
 
 export type LinkSchema = z.infer<typeof linkSchema>;

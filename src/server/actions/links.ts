@@ -64,6 +64,9 @@ export async function createLink(
       is_enabled: data.isEnabled,
       tracking_enabled: data.trackingEnabled,
       thumbnail_url: data.thumbnailUrl || null,
+      custom_bg_color: data.customBgColor || null,
+      custom_text_color: data.customTextColor || null,
+      custom_icon: data.customIcon || null,
       position,
       click_count: 0,
     })
@@ -174,6 +177,9 @@ export async function updateLink(
       is_enabled: data.isEnabled,
       tracking_enabled: data.trackingEnabled,
       thumbnail_url: data.thumbnailUrl || null,
+      custom_bg_color: data.customBgColor || null,
+      custom_text_color: data.customTextColor || null,
+      custom_icon: data.customIcon || null,
     })
     .eq("id", linkId)
     .select()

@@ -47,14 +47,14 @@ export function PublicPageRenderer({ data }: PublicPageRendererProps) {
             {/* ── HEADER ── */}
             <header className="mb-6 flex flex-col items-center text-center">
               {/* Avatar */}
-              <div className="mb-4 h-[96px] w-[96px] overflow-hidden rounded-full ring-[3px] ring-white shadow-lg">
+              <div className="mb-4 h-[96px] w-[96px] shrink-0 overflow-hidden rounded-full border-[3px] border-white shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.12)]">
                 {profile.avatar_url ? (
                   <Image
                     src={profile.avatar_url}
                     alt={profile.name}
                     width={96}
                     height={96}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover object-top"
                     priority
                   />
                 ) : (
