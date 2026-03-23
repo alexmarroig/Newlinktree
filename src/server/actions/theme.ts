@@ -42,6 +42,19 @@ export async function saveTheme(
         card_style: validation.data.cardStyle,
         background_image_url: validation.data.backgroundImageUrl || null,
         background_type: validation.data.backgroundType,
+        wallpaper_effect: validation.data.wallpaperEffect,
+        wallpaper_tint: validation.data.wallpaperTint,
+        wallpaper_noise: validation.data.wallpaperNoise,
+        page_font: validation.data.pageFont,
+        page_text_color: validation.data.pageFontColor || null,
+        title_font_color: validation.data.titleFontColor || null,
+        title_size: validation.data.titleSize,
+        avatar_layout: validation.data.avatarLayout,
+        button_style: validation.data.buttonStyle,
+        button_color: validation.data.buttonColor || null,
+        button_text_color: validation.data.buttonTextColor || null,
+        button_shadow: validation.data.buttonShadow,
+        button_roundness: validation.data.buttonRoundness,
       },
       { onConflict: "profile_id" },
     );
@@ -51,8 +64,7 @@ export async function saveTheme(
   }
 
   revalidatePath("/admin/theme");
-  // O tema também invalida a página pública via revalidação automática do next/cache
-  // quando a função getPublicPageData for chamada novamente
+  revalidatePath("/[slug]", "page");
 
   return { success: true, data: undefined };
 }

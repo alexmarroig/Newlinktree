@@ -4,11 +4,52 @@ interface ThemeApplierProps {
   theme: Theme;
 }
 
+const ROUNDNESS_MAP: Record<string, string> = {
+  square: "0.25rem",
+  round: "0.5rem",
+  rounder: "1rem",
+  full: "9999px",
+};
+
+const RADIUS_MAP: Record<string, string> = {
+  sm: "0.5rem",
+  md: "0.625rem",
+  lg: "0.75rem",
+  xl: "1.25rem",
+};
+
 /**
  * Injeta CSS variables do tema personalizado no <style> inline.
  * Server Component — zero overhead cliente.
  */
 export function ThemeApplier({ theme }: ThemeApplierProps) {
+  const btnRadius = ROUNDNESS_MAP[theme.button_roundness ?? "full"] ?? "9999px";
+  const pageRadius = RADIUS_MAP[theme.border_radius ?? "lg"] ?? "0.75rem";
+
+  // Shadow map for buttons
+  const shadowMap: Record<string, string> = {
+    none: "none",
+    soft: "0 2px 8px rgba(0,0,0,0.12)",
+    strong: "0 4px 16px rgba(0,0,0,0.22)",
+    hard: "4px 4px 0px rgba(0,0,0,0.80)",
+  };
+  const btnShadow = shadowMap[theme.button_shadow ?? "soft"] ?? shadowMap.soft;
+
+  // Button background color
+  const btnBg = theme.button_color
+    ? theme.button_color
+    : `hsl(${theme.primary_color})`;
+
+  const btnText = theme.button_text_color ?? "#ffffff";
+
+  // Wallpaper effect (mono, blur)
+  let pageFilter = "none";
+  if (theme.wallpaper_effect === "blur") pageFilter = "blur(8px)";
+  else if (theme.wallpaper_effect === "mono") pageFilter = "grayscale(100%)";
+
+  // Page font
+  const pageFont = theme.page_font ?? theme.font_body ?? "Inter";
+
   const css = `
     :root {
       --primary: ${theme.primary_color};
@@ -24,17 +65,41 @@ export function ThemeApplier({ theme }: ThemeApplierProps) {
         /(\d+)%\s*$/,
         (_, n) => `${Math.min(100, parseInt(n) + 30)}%`,
       )};
-      --radius: ${
-        theme.border_radius === "sm"
-          ? "0.5rem"
-          : theme.border_radius === "md"
-            ? "0.625rem"
-            : theme.border_radius === "xl"
-              ? "1.25rem"
-              : "0.75rem"
-      };
+      --radius: ${pageRadius};
       --font-heading: "${theme.font_heading}", ui-serif, serif;
-      --font-body: "${theme.font_body}", ui-sans-serif, system-ui, sans-serif;
+      --font-body: "${pageFont}", ui-sans-serif, system-ui, sans-serif;
+
+      /* Button tokens */
+      --btn-bg: ${btnBg};
+      --btn-text: ${btnText};
+      --btn-radius: ${btnRadius};
+      --btn-shadow: ${btnShadow};
+    }
+
+    /* Apply page font everywhere */
+    body { font-family: var(--font-body); }
+
+    /* Page text color override */
+    ${theme.page_text_color ? `body { color: ${theme.page_text_color}; }` : ""}
+
+    /* Title color override */
+    ${theme.title_font_color ? `.public-title { color: ${theme.title_font_color} !important; }` : ""}
+
+    /* Wallpaper background image with effect */
+    ${
+      theme.background_type === "image" && theme.background_image_url
+        ? `.public-bg-img { background-image: url('${theme.background_image_url}'); background-size: cover; background-position: center; background-attachment: fixed; }`
+        : ""
+    }
+    ${
+      theme.wallpaper_effect && theme.wallpaper_effect !== "none"
+        ? `.public-bg-img::before { content: ''; position: absolute; inset: 0; backdrop-filter: ${pageFilter}; pointer-events: none; }`
+        : ""
+    }
+    ${
+      theme.wallpaper_noise
+        ? `.public-bg-img { background-image: url('${theme.background_image_url ?? ""}'), url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E"); }`
+        : ""
     }
   `;
 

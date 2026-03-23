@@ -4,6 +4,7 @@ import type { PageData } from "@/types";
 import { InterestFormModal } from "./interest-form-modal";
 import { TrackingProvider } from "./tracking-provider";
 import { LinktreeLinkCard } from "./linktree-link-card";
+import { ThemeApplier } from "./theme-applier";
 
 interface PublicPageRendererProps {
   data: PageData;
@@ -30,12 +31,15 @@ export function PublicPageRenderer({ data }: PublicPageRendererProps) {
         }
       : undefined;
 
+  const isLargeTitle = theme?.title_size === "large";
+
   return (
     <>
+      {theme && <ThemeApplier theme={theme} />}
       <TrackingProvider slug={page.slug}>
         {/* ── PAGE WRAPPER ── */}
         <div
-          className="min-h-dvh bg-[#F5F5F5]"
+          className="public-bg-img relative min-h-dvh bg-[#F5F5F5]"
           style={bgStyle}
         >
           <main className="mx-auto max-w-[480px] px-4 py-10">
@@ -68,7 +72,7 @@ export function PublicPageRenderer({ data }: PublicPageRendererProps) {
               </div>
 
               {/* Name */}
-              <h1 className="text-[20px] font-bold leading-snug text-gray-900">
+              <h1 className={`public-title font-bold leading-snug text-gray-900 ${isLargeTitle ? "text-[26px]" : "text-[20px]"}`}>
                 {profile.name}
                 {profile.professional_title
                   ? ` | ${profile.professional_title}`
