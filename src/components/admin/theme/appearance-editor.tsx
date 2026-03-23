@@ -29,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/helpers";
 import { saveTheme } from "@/server/actions/theme";
 import { uploadAvatar } from "@/server/actions/avatar";
 import { themeSchema, type ThemeSchema } from "@/lib/validations";
