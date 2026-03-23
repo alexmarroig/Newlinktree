@@ -22,7 +22,7 @@ export async function saveEditorDraft(
     return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
   }
 
-  // Verifica que o usuário é dono da página
+  // Verifica que o usuário autenticado é dono da página
   const { data: page } = await supabase
     .from("pages")
     .select("id, slug, profiles!inner(user_id)")
@@ -31,6 +31,12 @@ export async function saveEditorDraft(
 
   if (!page) {
     return { success: false, error: "Página não encontrada" };
+  }
+
+  // Garante que o perfil vinculado pertence ao usuário autenticado
+  const profile = page.profiles as unknown as { user_id: string };
+  if (profile.user_id !== user.id) {
+    return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
   }
 
   // Atualiza cada bloco com position e content_json
@@ -64,6 +70,22 @@ export async function publishPage(pageId: string): Promise<ApiResponse> {
   } = await supabase.auth.getUser();
 
   if (!user) {
+    return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
+  }
+
+  // Verifica que o usuário autenticado é dono da página antes do snapshot
+  const { data: pageOwnerCheck } = await supabase
+    .from("pages")
+    .select("id, profiles!inner(user_id)")
+    .eq("id", pageId)
+    .single();
+
+  if (!pageOwnerCheck) {
+    return { success: false, error: "Página não encontrada" };
+  }
+
+  const ownerProfile = pageOwnerCheck.profiles as unknown as { user_id: string };
+  if (ownerProfile.user_id !== user.id) {
     return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
   }
 
