@@ -8,11 +8,11 @@ import { toast } from "sonner";
 import {
   User,
   LayoutTemplate,
-  Wallpaper,
+  Image as ImageIcon,
   Type,
   Square,
   Palette,
-  LayoutBottom,
+  PanelBottom,
   RefreshCw,
   Save,
   ExternalLink,
@@ -53,11 +53,11 @@ interface AppearanceEditorProps {
 const NAV_SECTIONS: { id: Section; label: string; Icon: React.ElementType }[] = [
   { id: "header", label: "Header", Icon: User },
   { id: "theme", label: "Tema", Icon: LayoutTemplate },
-  { id: "wallpaper", label: "Plano de fundo", Icon: Wallpaper },
+  { id: "wallpaper", label: "Plano de fundo", Icon: ImageIcon },
   { id: "text", label: "Texto", Icon: Type },
   { id: "buttons", label: "Botões", Icon: Square },
   { id: "colors", label: "Cores", Icon: Palette },
-  { id: "footer", label: "Rodapé", Icon: LayoutBottom },
+  { id: "footer", label: "Rodapé", Icon: PanelBottom },
 ];
 
 // ─── Preset themes ────────────────────────────────────────────────────────────
