@@ -13,7 +13,6 @@ import {
   Square,
   Palette,
   PanelBottom,
-  RefreshCw,
   Save,
   ExternalLink,
 } from "lucide-react";
@@ -172,38 +171,158 @@ function hexToHsl(hex: string): string {
   } catch { return "0 0% 0%"; }
 }
 
-// ─── HexColorInput ─────────────────────────────────────────────────────────
+// ─── ColorPickerButton ────────────────────────────────────────────────────────
+// Looks like a VisualOption but opens native color picker when clicked
 
-function HexColorInput({
+function ColorPickerButton({
   value,
   onChange,
   label,
+  fallback = "#000000",
 }: {
   value: string;
   onChange: (v: string) => void;
   label: string;
+  fallback?: string;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const displayHex = value || fallback;
+
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-gray-600">{label}</Label>
-      <div className="flex items-center gap-2 rounded-xl border border-border bg-white px-3 py-2">
+      <Label className="text-[11px] font-semibold uppercase tracking-wider text-blue-500">{label}</Label>
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        className="flex w-full items-center gap-3 rounded-xl border-2 border-transparent bg-gray-100 px-3 py-2.5 text-left transition-all duration-150 hover:border-gray-300 hover:bg-white hover:shadow-sm cursor-pointer"
+      >
+        <div
+          className="h-9 w-9 flex-shrink-0 rounded-xl border border-black/10 shadow-sm"
+          style={{ backgroundColor: displayHex }}
+        />
+        <div className="flex-1 min-w-0">
+          <p className="font-mono text-sm font-medium text-gray-800">{displayHex}</p>
+          <p className="text-[11px] text-gray-400">Clique para alterar</p>
+        </div>
+        <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
         <input
+          ref={inputRef}
           type="color"
-          value={value || "#000000"}
+          value={displayHex}
           onChange={(e) => onChange(e.target.value)}
-          className="h-6 w-6 cursor-pointer rounded-full border-0 bg-transparent p-0"
+          className="sr-only"
         />
-        <input
-          type="text"
-          value={value || ""}
-          onChange={(e) => {
-            const v = e.target.value;
-            if (/^#[0-9a-fA-F]{0,6}$/.test(v)) onChange(v);
-          }}
-          placeholder="#000000"
-          className="flex-1 bg-transparent text-sm outline-none font-mono"
-        />
+      </button>
+    </div>
+  );
+}
+
+// ─── PhonePreview ─────────────────────────────────────────────────────────────
+// Live preview component — reads directly from form state, no save needed
+
+const PREVIEW_ROUNDNESS: Record<string, string> = {
+  square: "4px", round: "8px", rounder: "16px", full: "9999px",
+};
+const PREVIEW_SHADOW: Record<string, string> = {
+  none: "none",
+  soft: "0 2px 8px rgba(0,0,0,0.15)",
+  strong: "0 4px 16px rgba(0,0,0,0.25)",
+  hard: "4px 4px 0px rgba(0,0,0,0.85)",
+};
+
+function PhonePreview({
+  values,
+  avatarPreview,
+  profileName,
+  pageSlug,
+}: {
+  values: ThemeSchema;
+  avatarPreview: string | null;
+  profileName: string;
+  pageSlug: string;
+}) {
+  const btnBg = values.buttonColor || "#1a1a1a";
+  const btnText = values.buttonTextColor || "#ffffff";
+  const radius = PREVIEW_ROUNDNESS[values.buttonRoundness] ?? "9999px";
+  const shadow = PREVIEW_SHADOW[values.buttonShadow] ?? "none";
+  const bgColor = values.backgroundType === "image" && values.backgroundImageUrl
+    ? undefined
+    : `hsl(${values.backgroundColor})`;
+  const bgImage = values.backgroundType === "image" && values.backgroundImageUrl
+    ? `url(${values.backgroundImageUrl})`
+    : undefined;
+  const textColor = values.pageFontColor || `hsl(${values.textColor})`;
+  const titleColor = values.titleFontColor || textColor;
+
+  const initials = profileName
+    .split(" ").filter(Boolean).slice(0, 2)
+    .map((n) => n[0]!.toUpperCase()).join("");
+
+  const btnStyle: React.CSSProperties = {
+    backgroundColor: btnBg,
+    color: btnText,
+    borderRadius: radius,
+    boxShadow: shadow,
+  };
+
+  const MOCK_LINKS = ["Link principal", "Segundo link", "Terceiro link"];
+
+  return (
+    <div
+      className="w-full h-full overflow-hidden flex flex-col items-center pt-5 px-3 gap-2.5"
+      style={{
+        backgroundColor: bgColor,
+        backgroundImage: bgImage,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        fontFamily: values.pageFont ? `"${values.pageFont}", sans-serif` : undefined,
+      }}
+    >
+      {/* Avatar */}
+      <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border-2 border-white shadow-md">
+        {avatarPreview ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={avatarPreview} alt="" className="h-full w-full object-cover object-top" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-gray-200">
+            <span className="text-base font-semibold text-gray-500">{initials}</span>
+          </div>
+        )}
       </div>
+
+      {/* Name */}
+      <div className="text-center leading-tight">
+        <p
+          className={`font-bold ${values.titleSize === "large" ? "text-[13px]" : "text-[11px]"}`}
+          style={{ color: titleColor }}
+        >
+          {profileName}
+        </p>
+        <p className="text-[9px] mt-0.5 opacity-60" style={{ color: textColor }}>
+          Psicóloga
+        </p>
+      </div>
+
+      {/* Mock links */}
+      {MOCK_LINKS.map((label, i) => (
+        <div
+          key={i}
+          className="w-full flex items-center justify-center px-3 py-2 text-[9px] font-semibold uppercase tracking-wide"
+          style={btnStyle}
+        >
+          {label}
+        </div>
+      ))}
+
+      {/* Footer hint */}
+      <a
+        href={`/${pageSlug}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-auto mb-2 text-[9px] text-gray-400 hover:text-gray-600 underline"
+      >
+        Ver página completa ↗
+      </a>
     </div>
   );
 }
@@ -252,7 +371,6 @@ export function AppearanceEditor({
   settings,
 }: AppearanceEditorProps) {
   const [activeSection, setActiveSection] = useState<Section>("header");
-  const [iframeKey, setIframeKey] = useState(0);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile.avatar_url ?? null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -298,8 +416,7 @@ export function AppearanceEditor({
       toast.error(result.error ?? "Erro ao salvar");
       return;
     }
-    toast.success("Aparência salva!");
-    setIframeKey((k) => k + 1);
+    toast.success("Aparência salva! A página pública foi atualizada.");
   }
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -316,7 +433,6 @@ export function AppearanceEditor({
       setAvatarPreview(profile.avatar_url ?? null);
     } else {
       toast.success("Foto atualizada!");
-      setIframeKey((k) => k + 1);
     }
   }
 
@@ -460,7 +576,7 @@ export function AppearanceEditor({
         </div>
 
         {bgType === "color" && (
-          <HexColorInput
+          <ColorPickerButton
             label="Cor de fundo"
             value={hslToHex(watch("backgroundColor"))}
             onChange={(hex) => setValue("backgroundColor", hexToHsl(hex))}
@@ -555,7 +671,7 @@ export function AppearanceEditor({
         </div>
 
         {/* Page text color */}
-        <HexColorInput
+        <ColorPickerButton
           label="Cor do texto da página"
           value={pageFontColor || hslToHex(watch("textColor"))}
           onChange={(hex) => {
@@ -565,9 +681,9 @@ export function AppearanceEditor({
         />
 
         {/* Title color */}
-        <HexColorInput
+        <ColorPickerButton
           label="Cor do título"
-          value={titleFontColor || "#000000"}
+          value={titleFontColor || hslToHex(watch("textColor"))}
           onChange={(hex) => setValue("titleFontColor", hex)}
         />
 
@@ -681,7 +797,7 @@ export function AppearanceEditor({
         </div>
 
         {/* Button color */}
-        <HexColorInput
+        <ColorPickerButton
           label="Cor do botão"
           value={btnColor || hslToHex(watch("primaryColor"))}
           onChange={(hex) => {
@@ -691,9 +807,10 @@ export function AppearanceEditor({
         />
 
         {/* Button text color */}
-        <HexColorInput
+        <ColorPickerButton
           label="Cor do texto do botão"
-          value={btnTextColor || "#ffffff"}
+          value={btnTextColor}
+          fallback="#ffffff"
           onChange={(hex) => setValue("buttonTextColor", hex)}
         />
       </div>
@@ -702,33 +819,39 @@ export function AppearanceEditor({
 
   function renderColors() {
     return (
-      <div className="space-y-5">
+      <div className="space-y-4">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-500">Paleta</p>
-        <HexColorInput
-          label="Cor primária (botões principais)"
+        <ColorPickerButton
+          label="Cor primária (botões)"
           value={watch("buttonColor") || hslToHex(watch("primaryColor"))}
           onChange={(hex) => {
             setValue("buttonColor", hex);
             setValue("primaryColor", hexToHsl(hex));
           }}
         />
-        <HexColorInput
-          label="Cor de fundo"
+        <ColorPickerButton
+          label="Texto dos botões"
+          value={watch("buttonTextColor")}
+          fallback="#ffffff"
+          onChange={(hex) => setValue("buttonTextColor", hex)}
+        />
+        <ColorPickerButton
+          label="Fundo da página"
           value={hslToHex(watch("backgroundColor"))}
           onChange={(hex) => setValue("backgroundColor", hexToHsl(hex))}
         />
-        <HexColorInput
-          label="Cor do texto"
+        <ColorPickerButton
+          label="Texto da página"
           value={watch("pageFontColor") || hslToHex(watch("textColor"))}
           onChange={(hex) => {
             setValue("pageFontColor", hex);
             setValue("textColor", hexToHsl(hex));
           }}
         />
-        <HexColorInput
-          label="Cor de destaque (cards)"
-          value={hslToHex(watch("accentColor"))}
-          onChange={(hex) => setValue("accentColor", hexToHsl(hex))}
+        <ColorPickerButton
+          label="Cor do título"
+          value={watch("titleFontColor") || hslToHex(watch("textColor"))}
+          onChange={(hex) => setValue("titleFontColor", hex)}
         />
       </div>
     );
@@ -784,15 +907,6 @@ export function AppearanceEditor({
       <div className="flex h-12 shrink-0 items-center justify-between border-b bg-white px-5">
         <h1 className="text-sm font-semibold text-gray-900">Aparência</h1>
         <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setIframeKey((k) => k + 1)}
-            title="Atualizar preview"
-          >
-            <RefreshCw className="h-4 w-4" />
-          </Button>
           <Button type="submit" size="sm" loading={formState.isSubmitting}>
             <Save className="h-4 w-4" />
             Salvar
@@ -841,22 +955,21 @@ export function AppearanceEditor({
               <ExternalLink className="h-3.5 w-3.5" />
             </a>
           </div>
-          {/* Phone frame */}
+          {/* Phone frame — live preview (updates instantly) */}
           <div className="relative w-[240px] rounded-[36px] border-[6px] border-gray-800 bg-gray-800 shadow-2xl overflow-hidden">
             {/* Notch */}
             <div className="absolute top-0 left-1/2 z-10 h-5 w-20 -translate-x-1/2 rounded-b-2xl bg-gray-800" />
             <div className="h-[480px] overflow-hidden rounded-[30px] bg-white">
-              <iframe
-                key={iframeKey}
-                src={`/${pageSlug}`}
-                className="h-full w-full border-0"
-                title="Preview da página pública"
-                style={{ transform: "scale(0.75)", transformOrigin: "top left", width: "133.33%", height: "133.33%" }}
+              <PhonePreview
+                values={watch()}
+                avatarPreview={avatarPreview}
+                profileName={profile.name}
+                pageSlug={pageSlug}
               />
             </div>
           </div>
           <p className="text-center text-[11px] text-muted-foreground">
-            Salve para ver as alterações no preview
+            Preview ao vivo — salve para publicar
           </p>
         </div>
       </div>
