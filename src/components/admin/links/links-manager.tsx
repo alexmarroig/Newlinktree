@@ -655,7 +655,7 @@ export function LinksManager({ pageId, pageSlug, links: initialLinks, profile, t
       </div>
 
       {/* Right: phone preview */}
-      <div className="hidden w-[380px] shrink-0 border-l border-border bg-muted/20 lg:flex">
+      <div className="hidden w-[420px] shrink-0 border-l border-border bg-muted/20 lg:flex">
         <LinksPhonePreview links={links} profile={profile} theme={theme} />
       </div>
 
