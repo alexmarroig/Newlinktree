@@ -100,6 +100,86 @@ const VARIANT_OPTIONS = [
   { value: "soft", label: "Suave" },
 ];
 
+// ─── Color swatch palette ─────────────────────────────────────────────────────
+
+const SWATCH_COLORS = [
+  // Neutros
+  "#ffffff", "#f5f5f5", "#e0e0e0", "#9e9e9e", "#424242", "#1a1a1a",
+  // Verdes
+  "#25d366", "#4caf50", "#2e7d32", "#1b5e20",
+  // Azuis
+  "#2196f3", "#1565c0", "#0d47a1", "#003c8f",
+  // Roxos
+  "#9c27b0", "#6a1b9a", "#7c4dff", "#4527a0",
+  // Rosas/Vermelhos
+  "#e91e63", "#c2185b", "#f44336", "#b71c1c",
+  // Amarelos/Laranjas
+  "#ff9800", "#e65100", "#ffc107", "#f57f17",
+  // Turquesa/Teal
+  "#009688", "#00695c",
+];
+
+function ColorSwatchPicker({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between">
+        <Label className="text-xs text-muted-foreground">{label}</Label>
+        {value && (
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="text-[11px] text-muted-foreground hover:text-foreground"
+          >
+            Limpar
+          </button>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {SWATCH_COLORS.map((color) => (
+          <button
+            key={color}
+            type="button"
+            title={color}
+            onClick={() => onChange(color)}
+            className="relative h-7 w-7 rounded-lg border border-gray-200 transition-transform hover:scale-110"
+            style={{ backgroundColor: color }}
+          >
+            {value === color && (
+              <span
+                className="absolute inset-0 flex items-center justify-center text-[13px] font-bold"
+                style={{ color: color === "#ffffff" || color === "#f5f5f5" || color === "#e0e0e0" ? "#333" : "#fff" }}
+              >
+                ✓
+              </span>
+            )}
+          </button>
+        ))}
+        {/* Custom color */}
+        <label
+          title="Cor personalizada"
+          className="relative flex h-7 w-7 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-gray-300 bg-gradient-to-br from-red-400 via-yellow-300 to-blue-400 transition-transform hover:scale-110"
+        >
+          <input
+            type="color"
+            value={value || "#000000"}
+            onChange={(e) => onChange(e.target.value)}
+            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+          />
+          <span className="text-[10px] font-bold text-white drop-shadow">+</span>
+        </label>
+      </div>
+    </div>
+  );
+}
+
 // ─── Link form (shared for create + edit) ─────────────────────────────────────
 
 function LinkForm({
@@ -301,59 +381,17 @@ function LinkForm({
       {/* Custom colors */}
       <div className="space-y-2">
         <Label>Cores personalizadas</Label>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label htmlFor="customBgColor" className="text-xs text-muted-foreground">
-              Fundo do botão
-            </Label>
-            <div className="flex items-center gap-2 rounded-lg border border-border bg-white px-2 py-1.5">
-              <input
-                type="color"
-                value={form.watch("customBgColor") || "#1a1a1a"}
-                onChange={(e) => form.setValue("customBgColor", e.target.value)}
-                className="h-6 w-6 cursor-pointer rounded border-0 bg-transparent p-0"
-              />
-              <input
-                type="text"
-                placeholder="Padrão"
-                value={form.watch("customBgColor") || ""}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  if (v === "" || /^#[0-9a-fA-F]{0,6}$/.test(v)) form.setValue("customBgColor", v);
-                }}
-                className="flex-1 bg-transparent text-xs font-mono outline-none"
-              />
-              {form.watch("customBgColor") && (
-                <button type="button" onClick={() => form.setValue("customBgColor", "")} className="text-muted-foreground hover:text-foreground text-xs">✕</button>
-              )}
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="customTextColor" className="text-xs text-muted-foreground">
-              Cor do texto/ícone
-            </Label>
-            <div className="flex items-center gap-2 rounded-lg border border-border bg-white px-2 py-1.5">
-              <input
-                type="color"
-                value={form.watch("customTextColor") || "#ffffff"}
-                onChange={(e) => form.setValue("customTextColor", e.target.value)}
-                className="h-6 w-6 cursor-pointer rounded border-0 bg-transparent p-0"
-              />
-              <input
-                type="text"
-                placeholder="Padrão"
-                value={form.watch("customTextColor") || ""}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  if (v === "" || /^#[0-9a-fA-F]{0,6}$/.test(v)) form.setValue("customTextColor", v);
-                }}
-                className="flex-1 bg-transparent text-xs font-mono outline-none"
-              />
-              {form.watch("customTextColor") && (
-                <button type="button" onClick={() => form.setValue("customTextColor", "")} className="text-muted-foreground hover:text-foreground text-xs">✕</button>
-              )}
-            </div>
-          </div>
+        <div className="space-y-3">
+          <ColorSwatchPicker
+            label="Fundo do botão"
+            value={form.watch("customBgColor") || ""}
+            onChange={(v) => form.setValue("customBgColor", v)}
+          />
+          <ColorSwatchPicker
+            label="Cor do texto/ícone"
+            value={form.watch("customTextColor") || ""}
+            onChange={(v) => form.setValue("customTextColor", v)}
+          />
         </div>
         {(form.watch("customBgColor") || form.watch("customTextColor")) && (
           <div
@@ -617,7 +655,7 @@ export function LinksManager({ pageId, pageSlug, links: initialLinks, profile, t
       </div>
 
       {/* Right: phone preview */}
-      <div className="hidden w-[320px] shrink-0 border-l border-border bg-muted/20 lg:flex">
+      <div className="hidden w-[380px] shrink-0 border-l border-border bg-muted/20 lg:flex">
         <LinksPhonePreview links={links} profile={profile} theme={theme} />
       </div>
 
