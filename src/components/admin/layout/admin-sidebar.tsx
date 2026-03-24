@@ -2,17 +2,11 @@
 
 import {
   BarChart3,
-  Blocks,
-  FileUp,
-  HelpCircle,
-  LayoutDashboard,
   Link2,
   LogOut,
   Palette,
-  Search,
   Settings,
   Users,
-  Wand2,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -20,71 +14,22 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/helpers";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 
-const NAV_ITEMS = [
-  {
-    label: "Dashboard",
-    href: "/admin",
-    icon: LayoutDashboard,
-    exact: true,
-  },
-  {
-    label: "Editor Visual",
-    href: "/admin/editor",
-    icon: Wand2,
-  },
-  {
-    label: "Links & CTAs",
-    href: "/admin/links",
-    icon: Link2,
-  },
-  {
-    label: "Blocos",
-    href: "/admin/blocks",
-    icon: Blocks,
-  },
-  {
-    label: "FAQ",
-    href: "/admin/faq",
-    icon: HelpCircle,
-  },
-  {
-    label: "Leads",
-    href: "/admin/leads",
-    icon: Users,
-  },
-  {
-    label: "Analytics",
-    href: "/admin/analytics",
-    icon: BarChart3,
-  },
-  {
-    label: "Arquivos",
-    href: "/admin/assets",
-    icon: FileUp,
-  },
-  {
-    label: "SEO",
-    href: "/admin/seo",
-    icon: Search,
-  },
-  {
-    label: "Tema",
-    href: "/admin/theme",
-    icon: Palette,
-  },
-  {
-    label: "Configurações",
-    href: "/admin/settings",
-    icon: Settings,
-  },
+const PRIMARY_NAV = [
+  { label: "Conteúdo", href: "/admin/links", icon: Link2 },
+  { label: "Design", href: "/admin/theme", icon: Palette },
+  { label: "Configurações", href: "/admin/settings", icon: Settings },
+] as const;
+
+const SECONDARY_NAV = [
+  { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  { label: "Leads", href: "/admin/leads", icon: Users },
 ] as const;
 
 export function AdminSidebar() {
   const pathname = usePathname();
   const { signOut } = useAuth();
 
-  function isActive(href: string, exact?: boolean) {
-    if (exact) return pathname === href;
+  function isActive(href: string) {
     return pathname.startsWith(href);
   }
 
@@ -107,13 +52,12 @@ export function AdminSidebar() {
           </div>
         </div>
 
-        {/* Navegação */}
+        {/* Navegação principal */}
         <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label="Navegação admin">
           <ul className="space-y-1">
-            {NAV_ITEMS.map((item) => {
+            {PRIMARY_NAV.map((item) => {
               const Icon = item.icon;
-              const active = isActive(item.href, "exact" in item ? item.exact : undefined);
-
+              const active = isActive(item.href);
               return (
                 <li key={item.href}>
                   <Link
@@ -133,6 +77,36 @@ export function AdminSidebar() {
               );
             })}
           </ul>
+
+          {/* Navegação secundária */}
+          <div className="mt-6 border-t border-border pt-4">
+            <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+              Dados
+            </p>
+            <ul className="space-y-0.5">
+              {SECONDARY_NAV.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item.href);
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={cn(
+                        "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200",
+                        active
+                          ? "bg-primary text-primary-foreground shadow-soft"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                      )}
+                      aria-current={active ? "page" : undefined}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" />
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </nav>
 
         {/* Footer sidebar */}
