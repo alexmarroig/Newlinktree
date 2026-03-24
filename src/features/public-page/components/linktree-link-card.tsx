@@ -114,6 +114,22 @@ export function LinktreeLinkCard({
   avatarUrl,
 }: LinktreeLinkCardProps) {
   const { openModal } = useFormModal();
+
+  // ── Divider / section label ─────────────────────────────────────────────────
+  if (link.type === "divider") {
+    return (
+      <div className="flex items-center gap-3 py-1">
+        <div className="h-px flex-1 bg-black/10" />
+        {link.label && (
+          <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+            {link.label}
+          </span>
+        )}
+        <div className="h-px flex-1 bg-black/10" />
+      </div>
+    );
+  }
+
   const isWhatsApp = link.type === "whatsapp";
   const iconConfig = ICON_CONFIG[link.type] ?? ICON_CONFIG.default;
   const styles = getCardStyles(link.variant, isWhatsApp, iconConfig);

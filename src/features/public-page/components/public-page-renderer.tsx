@@ -5,6 +5,7 @@ import { InterestFormModal } from "./interest-form-modal";
 import { TrackingProvider } from "./tracking-provider";
 import { LinktreeLinkCard } from "./linktree-link-card";
 import { ThemeApplier } from "./theme-applier";
+import { FloatingCta } from "./floating-cta";
 
 interface PublicPageRendererProps {
   data: PageData;
@@ -20,6 +21,8 @@ export function PublicPageRenderer({ data }: PublicPageRendererProps) {
   const enabledLinks = links
     .filter((l) => l.is_enabled)
     .sort((a, b) => a.position - b.position);
+
+  const primaryLink = enabledLinks.find((l) => l.variant === "primary" && l.type !== "divider") ?? null;
 
   const bgStyle =
     theme?.background_type === "image" && theme.background_image_url
@@ -93,6 +96,14 @@ export function PublicPageRenderer({ data }: PublicPageRendererProps) {
                 </p>
               )}
 
+              {/* Availability badge */}
+              {theme?.profile_badge_text && (
+                <span className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-[12px] font-medium text-green-700">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+                  {theme.profile_badge_text}
+                </span>
+              )}
+
               {/* Bio */}
               {profile.bio && (
                 <p className="mt-2 max-w-[320px] text-[13px] leading-relaxed text-gray-500">
@@ -104,13 +115,14 @@ export function PublicPageRenderer({ data }: PublicPageRendererProps) {
             {/* ── LINK CARDS ── */}
             <div className="flex flex-col gap-3">
               {enabledLinks.map((link) => (
-                <LinktreeLinkCard
-                  key={link.id}
-                  link={link}
-                  whatsappNumber={profile.whatsapp_number ?? ""}
-                  defaultWhatsappMessage={settings.whatsapp_default_message ?? ""}
-                  avatarUrl={profile.avatar_url}
-                />
+                <div key={link.id} className="reveal-item">
+                  <LinktreeLinkCard
+                    link={link}
+                    whatsappNumber={profile.whatsapp_number ?? ""}
+                    defaultWhatsappMessage={settings.whatsapp_default_message ?? ""}
+                    avatarUrl={profile.avatar_url}
+                  />
+                </div>
               ))}
             </div>
 
@@ -195,7 +207,21 @@ export function PublicPageRenderer({ data }: PublicPageRendererProps) {
 
         {/* Form modal — global */}
         <InterestFormModal pageId={page.id} settings={settings} />
+
+        {/* Floating CTA */}
+        <FloatingCta
+          primaryLink={primaryLink}
+          whatsappNumber={profile.whatsapp_number ?? ""}
+          defaultMessage={settings.whatsapp_default_message ?? ""}
+        />
       </TrackingProvider>
+
+      {/* Scroll-reveal script */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `(function(){var obs=new IntersectionObserver(function(entries){entries.forEach(function(e,i){if(e.isIntersecting){setTimeout(function(){e.target.classList.add('visible');},i*80);obs.unobserve(e.target);}});},{threshold:0.1});document.querySelectorAll('.reveal-item').forEach(function(el){obs.observe(el);});})();`,
+        }}
+      />
 
       {/* JSON-LD */}
       <script

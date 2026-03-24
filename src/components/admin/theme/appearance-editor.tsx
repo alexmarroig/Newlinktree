@@ -443,6 +443,7 @@ export function AppearanceEditor({
       buttonShadow: (theme?.button_shadow ?? "soft") as ThemeSchema["buttonShadow"],
       buttonRoundness: (theme?.button_roundness ?? "full") as ThemeSchema["buttonRoundness"],
       buttonAnimation: (theme?.button_animation ?? "none") as ThemeSchema["buttonAnimation"],
+      profileBadgeText: theme?.profile_badge_text ?? "",
     },
   });
 
@@ -542,6 +543,39 @@ export function AppearanceEditor({
             <VisualOption active={watch("titleSize") === "large"} onClick={() => setValue("titleSize", "large")} label="Large">
               <span className="text-lg font-bold">Aa</span>
             </VisualOption>
+          </div>
+        </div>
+
+        {/* Availability badge */}
+        <div className="space-y-3">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-500">
+            Badge de disponibilidade
+          </p>
+          <p className="text-[11px] text-gray-500">
+            Aparece abaixo do nome na página pública. Deixe em branco para ocultar.
+          </p>
+          <Input
+            placeholder="Ex: Disponível para novos pacientes"
+            value={watch("profileBadgeText") ?? ""}
+            onChange={(e) => setValue("profileBadgeText", e.target.value)}
+            maxLength={60}
+          />
+          <div className="flex flex-wrap gap-2">
+            {["Disponível para novos pacientes", "Lista de espera", "Agenda aberta", ""].map((chip) => (
+              <button
+                key={chip || "limpar"}
+                type="button"
+                onClick={() => setValue("profileBadgeText", chip)}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-[11px] font-medium transition-colors",
+                  watch("profileBadgeText") === chip
+                    ? "border-green-400 bg-green-50 text-green-700"
+                    : "border-gray-200 bg-white text-gray-600 hover:border-gray-300",
+                )}
+              >
+                {chip || "Limpar"}
+              </button>
+            ))}
           </div>
         </div>
       </div>

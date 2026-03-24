@@ -62,6 +62,7 @@ const TYPE_OPTIONS = [
   { value: "download", label: "Download" },
   { value: "form", label: "Formulário de contato" },
   { value: "scroll", label: "Rolar para seção" },
+  { value: "divider", label: "Separador de seção" },
 ];
 
 const VARIANT_OPTIONS = [

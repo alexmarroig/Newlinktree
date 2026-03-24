@@ -65,7 +65,7 @@ export const linkSchema = z.object({
     .max(100, "Label muito longo"),
   sublabel: z.string().max(200, "Sublabel muito longo").optional(),
   type: z.enum(
-    ["whatsapp", "url", "instagram", "download", "form", "scroll", "modal", "internal"],
+    ["whatsapp", "url", "instagram", "download", "form", "scroll", "modal", "internal", "divider"],
     { required_error: "Tipo é obrigatório" },
   ),
   icon: z.string().optional(),
@@ -187,6 +187,7 @@ export const themeSchema = z.object({
   buttonShadow: z.enum(["none", "soft", "strong", "hard"]).default("soft"),
   buttonRoundness: z.enum(["square", "round", "rounder", "full"]).default("full"),
   buttonAnimation: z.enum(["none", "shake", "pulse", "bounce"]).default("none"),
+  profileBadgeText: z.string().max(60).optional().or(z.literal("")),
 });
 
 export type ThemeSchema = z.infer<typeof themeSchema>;

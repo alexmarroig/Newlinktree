@@ -82,6 +82,7 @@ export type Database = {
           page_text_color: string | null;
           page_font: string;
           button_animation: string;
+          profile_badge_text: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -107,6 +108,7 @@ export type Database = {
           button_shadow?: string;
           button_roundness?: string;
           button_animation?: string;
+          profile_badge_text?: string | null;
           wallpaper_effect?: string;
           wallpaper_tint?: number;
           wallpaper_noise?: boolean;
@@ -419,7 +421,8 @@ export type LinkType =
   | "form"
   | "scroll"
   | "modal"
-  | "internal";
+  | "internal"
+  | "divider";
 
 export type LinkVariant =
   | "primary"
