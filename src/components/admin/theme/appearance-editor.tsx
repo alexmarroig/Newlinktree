@@ -15,6 +15,7 @@ import {
   PanelBottom,
   Save,
   ExternalLink,
+  Upload,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ import {
 import { cn } from "@/lib/helpers";
 import { saveTheme } from "@/server/actions/theme";
 import { uploadAvatar } from "@/server/actions/avatar";
+import { uploadBackgroundImage } from "@/server/actions/upload-image";
 import { themeSchema, type ThemeSchema } from "@/lib/validations";
 import { DEFAULT_THEME, APP_URL } from "@/lib/constants";
 import type { Theme, Profile, Settings } from "@/types";
@@ -411,7 +413,9 @@ export function AppearanceEditor({
   const [activeSection, setActiveSection] = useState<Section>("header");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile.avatar_url ?? null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingBg, setUploadingBg] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bgFileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ThemeSchema>({
     resolver: zodResolver(themeSchema),
@@ -472,6 +476,22 @@ export function AppearanceEditor({
       setAvatarPreview(profile.avatar_url ?? null);
     } else {
       toast.success("Foto atualizada!");
+    }
+  }
+
+  async function handleBgUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingBg(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    const result = await uploadBackgroundImage(profileId, fd);
+    setUploadingBg(false);
+    if (!result.success) {
+      toast.error(result.error ?? "Erro ao enviar imagem");
+    } else {
+      setValue("backgroundImageUrl", result.data.url);
+      toast.success("Imagem enviada! Salve para aplicar.");
     }
   }
 
@@ -671,18 +691,52 @@ export function AppearanceEditor({
           />
         )}
 
-        {/* Image URL input */}
+        {/* Image upload + preview */}
         {bgType === "image" && (
-          <div className="space-y-1.5">
-            <Label className="text-[11px] font-semibold uppercase tracking-wider text-blue-500">URL da imagem</Label>
-            <Input
-              placeholder="https://..."
-              value={watch("backgroundImageUrl") ?? ""}
-              onChange={(e) => setValue("backgroundImageUrl", e.target.value)}
+          <div className="space-y-3">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-500">Imagem de fundo</p>
+
+            {/* Preview */}
+            {watch("backgroundImageUrl") && (
+              <div className="relative h-24 w-full overflow-hidden rounded-xl border border-border">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={watch("backgroundImageUrl")!}
+                  alt="Preview do fundo"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            )}
+
+            {/* Upload button */}
+            <input
+              ref={bgFileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleBgUpload}
             />
-            <p className="text-[11px] text-muted-foreground">
-              Faça upload em Arquivos e cole a URL pública aqui.
-            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full"
+              loading={uploadingBg}
+              onClick={() => bgFileInputRef.current?.click()}
+            >
+              <Upload className="mr-2 h-3.5 w-3.5" />
+              {watch("backgroundImageUrl") ? "Trocar imagem" : "Fazer upload"}
+            </Button>
+
+            {/* Manual URL fallback */}
+            <div className="space-y-1">
+              <Label className="text-[11px] text-muted-foreground">Ou cole uma URL</Label>
+              <Input
+                placeholder="https://..."
+                value={watch("backgroundImageUrl") ?? ""}
+                onChange={(e) => setValue("backgroundImageUrl", e.target.value)}
+              />
+            </div>
           </div>
         )}
 
