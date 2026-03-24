@@ -116,9 +116,72 @@ export function ThemeApplier({ theme }: ThemeApplierProps) {
             #ffffff;
           animation: mesh-drift 18s ease-in-out infinite;
         }`
-            : bgType === "image" && theme.background_image_url
-              ? `.public-bg-img { background-image: url('${theme.background_image_url}'); background-size: cover; background-position: center; background-attachment: fixed; }`
-              : "";
+            : bgType === "sunset"
+              ? `
+        @keyframes sunset-flow {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        .public-bg-img {
+          background: linear-gradient(-45deg, #ff6b6b, #feca57, #ff9ff3, #ff6b9d, #f9ca24, #ff6b6b);
+          background-size: 400% 400%;
+          animation: sunset-flow 12s ease infinite;
+        }`
+              : bgType === "nebula"
+                ? `
+        @keyframes nebula-shift {
+          0%, 100% { background-position: 0% 50%, 100% 50%, 50% 0%; }
+          33% { background-position: 70% 20%, 30% 80%, 20% 70%; }
+          66% { background-position: 30% 80%, 70% 20%, 80% 30%; }
+        }
+        .public-bg-img {
+          background:
+            radial-gradient(ellipse 120% 80% at 0% 50%, rgba(255,0,128,0.55) 0%, transparent 60%),
+            radial-gradient(ellipse 120% 80% at 100% 50%, rgba(0,128,255,0.55) 0%, transparent 60%),
+            radial-gradient(ellipse 100% 60% at 50% 0%, rgba(128,0,255,0.45) 0%, transparent 60%),
+            #0a0a1a;
+          background-size: 200% 200%, 200% 200%, 200% 200%, auto;
+          animation: nebula-shift 16s ease-in-out infinite;
+          color: #fff;
+        }
+        .public-bg-img .public-title { color: #fff !important; }`
+                : bgType === "rose"
+                  ? `
+        @keyframes rose-drift {
+          0%, 100% { background-position: 20% 20%, 80% 80%, 50% 50%; }
+          33% { background-position: 70% 30%, 30% 70%, 80% 20%; }
+          66% { background-position: 30% 70%, 70% 30%, 20% 80%; }
+        }
+        .public-bg-img {
+          background:
+            radial-gradient(ellipse 130% 90% at 20% 20%, rgba(255,150,200,0.75) 0%, transparent 55%),
+            radial-gradient(ellipse 130% 90% at 80% 80%, rgba(255,100,180,0.65) 0%, transparent 55%),
+            radial-gradient(ellipse 100% 70% at 50% 50%, rgba(255,200,230,0.5) 0%, transparent 60%),
+            #fff0f6;
+          background-size: 200% 200%, 200% 200%, 200% 200%, auto;
+          animation: rose-drift 14s ease-in-out infinite;
+        }`
+                  : bgType === "neon"
+                    ? `
+        @keyframes neon-glow {
+          0%, 100% { background-position: 0% 50%, 100% 50%, 50% 100%; }
+          33% { background-position: 60% 20%, 40% 80%, 20% 40%; }
+          66% { background-position: 40% 80%, 60% 20%, 80% 60%; }
+        }
+        .public-bg-img {
+          background:
+            radial-gradient(ellipse 120% 70% at 0% 50%, rgba(0,255,180,0.35) 0%, transparent 60%),
+            radial-gradient(ellipse 120% 70% at 100% 50%, rgba(0,150,255,0.35) 0%, transparent 60%),
+            radial-gradient(ellipse 90% 60% at 50% 100%, rgba(200,0,255,0.28) 0%, transparent 60%),
+            #060614;
+          background-size: 200% 200%, 200% 200%, 200% 200%, auto;
+          animation: neon-glow 14s ease-in-out infinite;
+          color: #fff;
+        }
+        .public-bg-img .public-title { color: #fff !important; }`
+                    : bgType === "image" && theme.background_image_url
+                      ? `.public-bg-img { background-image: url('${theme.background_image_url}'); background-size: cover; background-position: center; background-attachment: fixed; }`
+                      : "";
 
   const css = `
     :root {

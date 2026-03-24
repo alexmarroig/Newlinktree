@@ -29,19 +29,19 @@ export function LinksPhonePreview({ links, profile, theme }: LinksPhonePreviewPr
   const pageBg = theme?.background_color ?? "#f9f9f9";
 
   return (
-    <div className="flex h-full flex-col items-center justify-center px-4 py-6">
+    <div className="flex h-full flex-col items-center justify-start overflow-y-auto px-6 pt-6 pb-4">
       {/* URL bar */}
-      <div className="mb-3 flex w-full max-w-[300px] items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5">
-        <div className="h-2 w-2 rounded-full bg-green-400" />
-        <span className="truncate text-[10px] text-gray-500">
+      <div className="mb-3 flex w-full items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5">
+        <div className="h-2 w-2 shrink-0 rounded-full bg-green-400" />
+        <span className="truncate text-[11px] text-gray-500">
           {profile ? `biohub.app/${profile.name?.toLowerCase().replace(/\s+/g, "-")}` : "sua-pagina"}
         </span>
       </div>
 
-      {/* Phone frame */}
+      {/* Phone frame — fills available width */}
       <div
-        className="relative w-full max-w-[300px] overflow-hidden rounded-[32px] border-[6px] border-gray-800 shadow-2xl"
-        style={{ height: "560px" }}
+        className="relative w-full overflow-hidden rounded-[32px] border-[6px] border-gray-800 shadow-2xl"
+        style={{ minHeight: "580px" }}
       >
         {/* Phone content */}
         <div
