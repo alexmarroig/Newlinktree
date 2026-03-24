@@ -177,9 +177,12 @@
   /* ---- Botão CTA premium ---- */
   .cta-button-primary {
     @apply inline-flex w-full items-center justify-between gap-3
-           rounded-xl bg-primary px-5 py-4 text-primary-foreground
+           rounded-xl px-5 py-4
            shadow-soft transition-all duration-250
            hover:shadow-soft-md active:scale-[0.98];
+    background: var(--btn-bg, hsl(var(--primary)));
+    color: var(--btn-text, hsl(var(--primary-foreground)));
+    border: 1px solid hsl(var(--border));
   }
 
   .cta-button-secondary {
