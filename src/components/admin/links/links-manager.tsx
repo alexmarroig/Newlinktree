@@ -1,7 +1,19 @@
 "use client";
 
-import { Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import {
+  Pencil,
+  Plus,
+  Trash2,
+  MessageCircle,
+  ClipboardList,
+  Globe,
+  Instagram,
+  FileText,
+  Minus,
+  Link2,
+  MousePointer,
+} from "lucide-react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -36,6 +48,17 @@ interface LinksManagerProps {
   links: Link[];
 }
 
+const ADMIN_ICON_CONFIG: Record<string, { Icon: React.ElementType; bg: string; color: string }> = {
+  whatsapp: { Icon: MessageCircle, bg: "bg-green-100", color: "text-green-600" },
+  form:     { Icon: ClipboardList, bg: "bg-violet-100", color: "text-violet-600" },
+  url:      { Icon: Globe, bg: "bg-sky-100", color: "text-sky-600" },
+  instagram:{ Icon: Instagram, bg: "bg-pink-100", color: "text-pink-600" },
+  download: { Icon: FileText, bg: "bg-amber-100", color: "text-amber-600" },
+  divider:  { Icon: Minus, bg: "bg-gray-100", color: "text-gray-400" },
+  scroll:   { Icon: MousePointer, bg: "bg-teal-100", color: "text-teal-600" },
+  default:  { Icon: Link2, bg: "bg-stone-100", color: "text-stone-500" },
+};
+
 const TYPE_LABELS: Record<string, string> = {
   whatsapp: "WhatsApp",
   url: "URL",
@@ -62,6 +85,7 @@ const TYPE_OPTIONS = [
   { value: "download", label: "Download" },
   { value: "form", label: "Formulário de contato" },
   { value: "scroll", label: "Rolar para seção" },
+  { value: "divider", label: "Separador de seção" },
 ];
 
 const VARIANT_OPTIONS = [
@@ -460,13 +484,9 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
                   key={link.id}
                   className={`flex items-center gap-4 px-6 py-4 transition-colors hover:bg-muted/30 ${!link.is_enabled ? "opacity-60" : ""}`}
                 >
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
-                    {link.position + 1}
-                  </span>
-
-                  {/* Thumbnail preview */}
-                  {link.thumbnail_url && (
-                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg border">
+                  {/* Link-type icon */}
+                  {link.thumbnail_url ? (
+                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border">
                       <Image
                         src={link.thumbnail_url}
                         alt=""
@@ -475,7 +495,14 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
                         className="h-full w-full object-cover"
                       />
                     </div>
-                  )}
+                  ) : (() => {
+                    const iconCfg = ADMIN_ICON_CONFIG[link.type] ?? ADMIN_ICON_CONFIG.default;
+                    return (
+                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${iconCfg.bg}`}>
+                        <iconCfg.Icon className={`h-5 w-5 ${iconCfg.color}`} />
+                      </div>
+                    );
+                  })()}
 
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
@@ -493,11 +520,9 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
                       <Badge variant="outline" className="text-[10px]">
                         {TYPE_LABELS[link.type] ?? link.type}
                       </Badge>
-                      {link.click_count > 0 && (
-                        <span className="text-[11px] text-muted-foreground">
-                          {link.click_count} clique{link.click_count !== 1 ? "s" : ""}
-                        </span>
-                      )}
+                      <span className={`text-[11px] font-medium tabular-nums ${link.click_count > 0 ? "text-blue-600" : "text-muted-foreground"}`}>
+                        {link.click_count} clique{link.click_count !== 1 ? "s" : ""}
+                      </span>
                       {link.url && (
                         <span className="max-w-[200px] truncate text-[11px] text-muted-foreground">
                           {link.url}

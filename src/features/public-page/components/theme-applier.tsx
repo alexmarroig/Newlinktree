@@ -196,6 +196,14 @@ export function ThemeApplier({ theme }: ThemeApplierProps) {
     }
 
     ${animationCss}
+
+    /* Scroll-reveal */
+    @keyframes reveal {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal-item { opacity: 0; }
+    .reveal-item.visible { animation: reveal 0.45s ease forwards; }
   `;
 
   return <style dangerouslySetInnerHTML={{ __html: css }} />;
