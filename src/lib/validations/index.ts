@@ -169,7 +169,7 @@ export const themeSchema = z.object({
   cardStyle: z.enum(["flat", "elevated", "bordered"]).default("elevated"),
   // Wallpaper
   backgroundImageUrl: z.string().url().optional().or(z.literal("")),
-  backgroundType: z.enum(["color", "image"]).default("color"),
+  backgroundType: z.enum(["color", "image", "gradient", "aurora", "waves", "mesh"]).default("color"),
   wallpaperEffect: z.enum(["none", "mono", "blur", "halftone"]).default("none"),
   wallpaperTint: z.number().min(0).max(100).default(20),
   wallpaperNoise: z.boolean().default(false),

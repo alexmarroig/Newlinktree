@@ -83,6 +83,69 @@ export function ThemeApplier({ theme }: ThemeApplierProps) {
   // Page font
   const pageFont = theme.page_font ?? theme.font_body ?? "Inter";
 
+  // ── Interactive backgrounds ────────────────────────────────────────────────
+  const bgType = theme.background_type ?? "color";
+
+  const interactiveBgCss =
+    bgType === "gradient"
+      ? `
+        @keyframes bg-grad {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        .public-bg-img {
+          background: linear-gradient(-45deg, hsl(${theme.background_color}), #EAF0FF, ${btnBg}22, hsl(${theme.background_color}));
+          background-size: 300% 300%;
+          animation: bg-grad 14s ease infinite;
+        }`
+      : bgType === "aurora"
+        ? `
+        @keyframes aurora-glow {
+          0%, 100% { background-position: 0% 50%, 100% 50%, 50% 100%; }
+          33% { background-position: 50% 0%, 50% 100%, 0% 50%; }
+          66% { background-position: 100% 50%, 0% 50%, 100% 0%; }
+        }
+        .public-bg-img {
+          background:
+            radial-gradient(ellipse 110% 80% at 0% 50%, rgba(0,210,255,0.45) 0%, transparent 60%),
+            radial-gradient(ellipse 110% 80% at 100% 50%, rgba(180,0,255,0.40) 0%, transparent 60%),
+            radial-gradient(ellipse 80% 60% at 50% 100%, rgba(0,255,180,0.30) 0%, transparent 60%),
+            #0e1628;
+          background-size: 200% 200%, 200% 200%, 200% 200%, auto;
+          animation: aurora-glow 18s ease-in-out infinite;
+          color: #fff;
+        }
+        .public-bg-img .public-title { color: #fff !important; }`
+        : bgType === "waves"
+          ? `
+        @keyframes wave-shift {
+          0% { background-position: center, 0px 92%, -300px 98%; }
+          100% { background-position: center, 800px 92%, 500px 98%; }
+        }
+        .public-bg-img {
+          background-color: #E8F4FD;
+          background-image:
+            none,
+            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 80'%3E%3Cpath fill='rgba(59%2C130%2C246%2C0.25)' d='M0,40 C100,10 300,70 500,35 C650,10 750,60 800,40 L800,80 L0,80Z'/%3E%3C/svg%3E"),
+            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 80'%3E%3Cpath fill='rgba(59%2C130%2C246%2C0.15)' d='M0,50 C150,20 400,80 600,30 C720,0 780,50 800,55 L800,80 L0,80Z'/%3E%3C/svg%3E");
+          background-repeat: no-repeat, repeat-x, repeat-x;
+          background-size: cover, 800px 100px, 600px 80px;
+          animation: wave-shift 10s linear infinite;
+        }`
+          : bgType === "mesh"
+            ? `
+        .public-bg-img {
+          background:
+            radial-gradient(ellipse at 15% 15%, rgba(255,180,180,0.65) 0%, transparent 50%),
+            radial-gradient(ellipse at 85% 10%, rgba(180,180,255,0.65) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 90%, rgba(180,255,200,0.55) 0%, transparent 55%),
+            radial-gradient(ellipse at 85% 80%, rgba(255,200,240,0.55) 0%, transparent 50%),
+            #ffffff;
+        }`
+            : bgType === "image" && theme.background_image_url
+              ? `.public-bg-img { background-image: url('${theme.background_image_url}'); background-size: cover; background-position: center; background-attachment: fixed; }`
+              : "";
+
   const css = `
     :root {
       --primary: ${theme.primary_color};
@@ -118,19 +181,16 @@ export function ThemeApplier({ theme }: ThemeApplierProps) {
     /* Title color override */
     ${theme.title_font_color ? `.public-title { color: ${theme.title_font_color} !important; }` : ""}
 
-    /* Wallpaper background image with effect */
+    /* Interactive / wallpaper background */
+    ${interactiveBgCss}
+
     ${
-      theme.background_type === "image" && theme.background_image_url
-        ? `.public-bg-img { background-image: url('${theme.background_image_url}'); background-size: cover; background-position: center; background-attachment: fixed; }`
-        : ""
-    }
-    ${
-      theme.wallpaper_effect && theme.wallpaper_effect !== "none"
+      theme.wallpaper_effect && theme.wallpaper_effect !== "none" && bgType === "image"
         ? `.public-bg-img::before { content: ''; position: absolute; inset: 0; backdrop-filter: ${pageFilter}; pointer-events: none; }`
         : ""
     }
     ${
-      theme.wallpaper_noise
+      theme.wallpaper_noise && bgType === "image"
         ? `.public-bg-img { background-image: url('${theme.background_image_url ?? ""}'), url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E"); }`
         : ""
     }

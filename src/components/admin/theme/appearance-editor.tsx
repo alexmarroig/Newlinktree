@@ -245,13 +245,43 @@ function PhonePreview({
   const btnText = values.buttonTextColor || "#ffffff";
   const radius = PREVIEW_ROUNDNESS[values.buttonRoundness] ?? "9999px";
   const shadow = PREVIEW_SHADOW[values.buttonShadow] ?? "none";
-  const bgColor = values.backgroundType === "image" && values.backgroundImageUrl
-    ? undefined
-    : `hsl(${values.backgroundColor})`;
-  const bgImage = values.backgroundType === "image" && values.backgroundImageUrl
-    ? `url(${values.backgroundImageUrl})`
-    : undefined;
-  const textColor = values.pageFontColor || `hsl(${values.textColor})`;
+  const bgType = values.backgroundType;
+
+  // Compute background style based on type
+  let containerStyle: React.CSSProperties = {};
+  let isAurora = false;
+  if (bgType === "image" && values.backgroundImageUrl) {
+    containerStyle = { backgroundImage: `url(${values.backgroundImageUrl})`, backgroundSize: "cover", backgroundPosition: "center" };
+  } else if (bgType === "gradient") {
+    containerStyle = {
+      background: `linear-gradient(-45deg, hsl(${values.backgroundColor}), #EAF0FF, ${btnBg}22, hsl(${values.backgroundColor}))`,
+      backgroundSize: "300% 300%",
+      animation: "bg-grad-preview 14s ease infinite",
+    };
+  } else if (bgType === "aurora") {
+    isAurora = true;
+    containerStyle = {
+      background: "radial-gradient(ellipse 110% 80% at 0% 50%, rgba(0,210,255,0.45), transparent 60%), radial-gradient(ellipse 110% 80% at 100% 50%, rgba(180,0,255,0.40), transparent 60%), radial-gradient(ellipse 80% 60% at 50% 100%, rgba(0,255,180,0.30), transparent 60%), #0e1628",
+      backgroundSize: "200% 200%, 200% 200%, 200% 200%, auto",
+      animation: "aurora-glow-preview 18s ease-in-out infinite",
+    };
+  } else if (bgType === "waves") {
+    containerStyle = {
+      backgroundColor: "#E8F4FD",
+      backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 80'%3E%3Cpath fill='rgba(59%2C130%2C246%2C0.25)' d='M0,40 C100,10 300,70 500,35 C650,10 750,60 800,40 L800,80 L0,80Z'/%3E%3C/svg%3E\")",
+      backgroundRepeat: "repeat-x",
+      backgroundSize: "800px 100px",
+      backgroundPosition: "0px 85%",
+    };
+  } else if (bgType === "mesh") {
+    containerStyle = {
+      background: "radial-gradient(ellipse at 15% 15%, rgba(255,180,180,0.65), transparent 50%), radial-gradient(ellipse at 85% 10%, rgba(180,180,255,0.65), transparent 50%), radial-gradient(ellipse at 50% 90%, rgba(180,255,200,0.55), transparent 55%), #ffffff",
+    };
+  } else {
+    containerStyle = { backgroundColor: `hsl(${values.backgroundColor})` };
+  }
+
+  const textColor = values.pageFontColor || (isAurora ? "#ffffff" : `hsl(${values.textColor})`);
   const titleColor = values.titleFontColor || textColor;
 
   const initials = profileName
@@ -270,14 +300,22 @@ function PhonePreview({
   return (
     <div
       className="w-full h-full overflow-hidden flex flex-col items-center pt-5 px-3 gap-2.5"
-      style={{
-        backgroundColor: bgColor,
-        backgroundImage: bgImage,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        fontFamily: values.pageFont ? `"${values.pageFont}", sans-serif` : undefined,
-      }}
+      style={{ ...containerStyle, fontFamily: values.pageFont ? `"${values.pageFont}", sans-serif` : undefined }}
     >
+      {/* Inject keyframes for animated types */}
+      {(bgType === "gradient" || bgType === "aurora") && (
+        <style>{`
+          @keyframes bg-grad-preview {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+          }
+          @keyframes aurora-glow-preview {
+            0%, 100% { background-position: 0% 50%, 100% 50%, 50% 100%; }
+            33% { background-position: 50% 0%, 50% 100%, 0% 50%; }
+            66% { background-position: 100% 50%, 0% 50%, 100% 0%; }
+          }
+        `}</style>
+      )}
       {/* Avatar */}
       <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border-2 border-white shadow-md">
         {avatarPreview ? (
@@ -560,21 +598,37 @@ export function AppearanceEditor({
 
     return (
       <div className="space-y-7">
-        {/* Style */}
+        {/* Type */}
         <div className="space-y-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-500">Estilo</p>
-          <div className="flex gap-3">
-            <VisualOption active={bgType === "color"} onClick={() => setValue("backgroundType", "color")} label="Fill">
-              <div className="h-10 w-14 rounded-lg bg-gradient-to-br from-gray-100 to-gray-300" />
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-500">Tipo</p>
+          <div className="grid grid-cols-3 gap-2">
+            <VisualOption active={bgType === "color"} onClick={() => setValue("backgroundType", "color")} label="Cor sólida">
+              <div className="h-10 w-full rounded-lg bg-gradient-to-br from-gray-50 to-gray-200 border border-gray-200" />
             </VisualOption>
             <VisualOption active={bgType === "image"} onClick={() => setValue("backgroundType", "image")} label="Imagem">
-              <div className="h-10 w-14 overflow-hidden rounded-lg bg-gray-200 flex items-center justify-center">
-                <span className="text-[10px] text-gray-400">IMG</span>
+              <div className="h-10 w-full rounded-lg bg-gray-200 flex items-center justify-center">
+                <span className="text-base">🖼</span>
               </div>
+            </VisualOption>
+            <VisualOption active={bgType === "gradient"} onClick={() => setValue("backgroundType", "gradient")} label="Gradiente">
+              <div className="h-10 w-full rounded-lg" style={{ background: "linear-gradient(-45deg, #E8F0FF, #EAF0FF, #DBEAFE, #F0EAFF)", backgroundSize: "200% 200%" }} />
+            </VisualOption>
+            <VisualOption active={bgType === "aurora"} onClick={() => setValue("backgroundType", "aurora")} label="Aurora">
+              <div className="h-10 w-full rounded-lg overflow-hidden" style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(0,210,255,0.5), transparent 60%), radial-gradient(ellipse at 80% 50%, rgba(180,0,255,0.5), transparent 60%), #0e1628" }} />
+            </VisualOption>
+            <VisualOption active={bgType === "waves"} onClick={() => setValue("backgroundType", "waves")} label="Ondas">
+              <div className="h-10 w-full rounded-lg overflow-hidden bg-sky-100 relative">
+                <div className="absolute bottom-0 left-0 right-0 h-4 rounded-b-lg bg-blue-300/50" />
+                <div className="absolute bottom-1 left-0 right-0 h-3 rounded-b-lg bg-blue-400/40" />
+              </div>
+            </VisualOption>
+            <VisualOption active={bgType === "mesh"} onClick={() => setValue("backgroundType", "mesh")} label="Mesh">
+              <div className="h-10 w-full rounded-lg" style={{ background: "radial-gradient(ellipse at 20% 20%, rgba(255,180,180,0.8), transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(180,180,255,0.8), transparent 50%), radial-gradient(ellipse at 50% 85%, rgba(180,255,200,0.7), transparent 50%), #fff" }} />
             </VisualOption>
           </div>
         </div>
 
+        {/* Color fill option */}
         {bgType === "color" && (
           <ColorPickerButton
             label="Cor de fundo"
@@ -583,64 +637,58 @@ export function AppearanceEditor({
           />
         )}
 
+        {/* Image URL input */}
         {bgType === "image" && (
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-gray-600">URL da imagem de fundo</Label>
+            <Label className="text-[11px] font-semibold uppercase tracking-wider text-blue-500">URL da imagem</Label>
             <Input
               placeholder="https://..."
               value={watch("backgroundImageUrl") ?? ""}
               onChange={(e) => setValue("backgroundImageUrl", e.target.value)}
             />
             <p className="text-[11px] text-muted-foreground">
-              Faça upload em Arquivos e cole a URL pública aqui
+              Faça upload em Arquivos e cole a URL pública aqui.
             </p>
           </div>
         )}
 
-        {/* Effect */}
-        <div className="space-y-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-500">Efeito</p>
-          <div className="flex gap-2">
-            {(["none", "mono", "blur", "halftone"] as const).map((ef) => (
-              <VisualOption key={ef} active={effect === ef} onClick={() => setValue("wallpaperEffect", ef)} label={ef === "none" ? "Nenhum" : ef === "mono" ? "Mono" : ef === "blur" ? "Blur" : "Halftone"}>
-                <div className="h-8 w-10 rounded-lg bg-gray-200 flex items-center justify-center">
-                  <span className="text-[9px] text-gray-500">
-                    {ef === "none" ? "∅" : ef === "mono" ? "M" : ef === "blur" ? "B" : "H"}
-                  </span>
-                </div>
-              </VisualOption>
-            ))}
+        {/* Info for interactive types */}
+        {["gradient", "aurora", "waves", "mesh"].includes(bgType) && (
+          <div className="rounded-xl bg-blue-50 border border-blue-100 px-4 py-3">
+            <p className="text-[11px] text-blue-700 font-medium">
+              {bgType === "gradient" && "Gradiente animado que se move suavemente usando suas cores do tema."}
+              {bgType === "aurora" && "Efeito aurora boreal com luzes animadas em fundo escuro."}
+              {bgType === "waves" && "Ondas animadas em fundo azul claro — ideal para perfis de saúde e bem-estar."}
+              {bgType === "mesh" && "Gradiente mesh colorido estático com tons pastéis suaves."}
+            </p>
+            <p className="text-[10px] text-blue-500 mt-1">Salve para ver na página pública.</p>
           </div>
-        </div>
+        )}
 
-        {/* Tint */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-500">Tint</p>
-            <span className="text-xs text-muted-foreground">{tint}%</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-base">🌙</span>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={tint}
-              onChange={(e) => setValue("wallpaperTint", Number(e.target.value))}
-              className="flex-1 accent-gray-900"
-            />
-            <span className="text-base">☀️</span>
-          </div>
-        </div>
-
-        {/* Noise */}
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium">Noise</p>
-            <p className="text-xs text-muted-foreground">Adiciona textura granulada sutil</p>
-          </div>
-          <Switch checked={noise} onCheckedChange={(v) => setValue("wallpaperNoise", v)} />
-        </div>
+        {/* Extra effects only for image bg */}
+        {bgType === "image" && (
+          <>
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-500">Efeito</p>
+              <div className="flex gap-2">
+                {(["none", "mono", "blur"] as const).map((ef) => (
+                  <VisualOption key={ef} active={effect === ef} onClick={() => setValue("wallpaperEffect", ef)} label={ef === "none" ? "Nenhum" : ef === "mono" ? "Mono" : "Blur"}>
+                    <div className="h-8 w-12 rounded-lg bg-gray-200 flex items-center justify-center">
+                      <span className="text-[9px] text-gray-500">{ef === "none" ? "∅" : ef === "mono" ? "M" : "B"}</span>
+                    </div>
+                  </VisualOption>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Noise</p>
+                <p className="text-xs text-muted-foreground">Textura granulada sutil</p>
+              </div>
+              <Switch checked={noise} onCheckedChange={(v) => setValue("wallpaperNoise", v)} />
+            </div>
+          </>
+        )}
       </div>
     );
   }
