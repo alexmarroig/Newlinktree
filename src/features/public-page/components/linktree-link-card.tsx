@@ -219,6 +219,12 @@ export function LinktreeLinkCard({
     );
   };
 
+  // ── Per-link attention animation ─────────────────────────────────────────────
+  const animClass =
+    link.link_animation && link.link_animation !== "none"
+      ? `link-anim-${link.link_animation}`
+      : "";
+
   // ── Custom per-link colors override everything ───────────────────────────────
   const hasCustomColors = !isWhatsApp && (link.custom_bg_color || link.custom_text_color);
 
@@ -251,6 +257,7 @@ export function LinktreeLinkCard({
     useInlineColor ? "" : "rounded-2xl",
     useInlineColor ? "" : styles.card,
     !useInlineColor ? styles.card : "",
+    animClass,
   ].join(" ").replace(/\s+/g, " ").trim();
 
   const label = (

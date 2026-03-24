@@ -67,6 +67,7 @@ export async function createLink(
       custom_bg_color: data.customBgColor || null,
       custom_text_color: data.customTextColor || null,
       custom_icon: data.customIcon || null,
+      link_animation: data.linkAnimation ?? "none",
       position,
       click_count: 0,
     })
@@ -180,6 +181,7 @@ export async function updateLink(
       custom_bg_color: data.customBgColor || null,
       custom_text_color: data.customTextColor || null,
       custom_icon: data.customIcon || null,
+      link_animation: data.linkAnimation ?? "none",
     })
     .eq("id", linkId)
     .select()

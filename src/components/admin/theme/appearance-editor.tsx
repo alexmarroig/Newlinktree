@@ -907,31 +907,6 @@ export function AppearanceEditor({
           </div>
         </div>
 
-        {/* Animation */}
-        <div className="space-y-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-500">Animação (atenção)</p>
-          <div className="flex gap-2 flex-wrap">
-            {([
-              { id: "none", label: "Nenhuma", emoji: "–" },
-              { id: "shake", label: "Shake", emoji: "↔" },
-              { id: "pulse", label: "Pulse", emoji: "◎" },
-              { id: "bounce", label: "Bounce", emoji: "↕" },
-            ] as const).map((opt) => (
-              <VisualOption
-                key={opt.id}
-                active={watch("buttonAnimation") === opt.id}
-                onClick={() => setValue("buttonAnimation", opt.id)}
-                label={opt.label}
-              >
-                <span className="text-lg leading-none">{opt.emoji}</span>
-              </VisualOption>
-            ))}
-          </div>
-          <p className="text-[11px] text-muted-foreground">
-            Anima os botões da página para chamar atenção dos visitantes
-          </p>
-        </div>
-
         {/* Button color */}
         <ColorPickerButton
           label="Cor do botão"

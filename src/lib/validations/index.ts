@@ -88,6 +88,7 @@ export const linkSchema = z.object({
   customBgColor: z.string().optional().or(z.literal("")),
   customTextColor: z.string().optional().or(z.literal("")),
   customIcon: z.string().optional().or(z.literal("")),
+  linkAnimation: z.enum(["none", "shake", "pulse", "bounce"]).default("none"),
 });
 
 export type LinkSchema = z.infer<typeof linkSchema>;
