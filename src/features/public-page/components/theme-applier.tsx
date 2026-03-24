@@ -40,40 +40,7 @@ export function ThemeApplier({ theme }: ThemeApplierProps) {
 
   const btnText = theme.button_text_color ?? "#ffffff";
 
-  // Button animation
-  const btnAnimation = theme.button_animation ?? "none";
-  const animationCss =
-    btnAnimation === "none"
-      ? ""
-      : btnAnimation === "shake"
-        ? `
-    @keyframes btn-shake {
-      0%, 100% { transform: translateX(0); }
-      15% { transform: translateX(-4px) rotate(-1deg); }
-      30% { transform: translateX(4px) rotate(1deg); }
-      45% { transform: translateX(-3px); }
-      60% { transform: translateX(3px); }
-      75% { transform: translateX(-2px); }
-    }
-    .link-card { animation: btn-shake 2.8s ease-in-out infinite; }
-    `
-        : btnAnimation === "pulse"
-          ? `
-    @keyframes btn-pulse {
-      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0,0,0,0.15); }
-      50% { transform: scale(1.025); box-shadow: 0 0 0 6px rgba(0,0,0,0); }
-    }
-    .link-card { animation: btn-pulse 2s ease-in-out infinite; }
-    `
-          : btnAnimation === "bounce"
-            ? `
-    @keyframes btn-bounce {
-      0%, 100% { transform: translateY(0); animation-timing-function: cubic-bezier(0.8,0,1,1); }
-      50% { transform: translateY(-5px); animation-timing-function: cubic-bezier(0,0,0.2,1); }
-    }
-    .link-card { animation: btn-bounce 1.6s infinite; }
-    `
-            : "";
+  // Button animation — removed global animationCss; per-link animations use .link-anim-* classes
 
   // Wallpaper effect (mono, blur)
   let pageFilter = "none";
@@ -195,15 +162,34 @@ export function ThemeApplier({ theme }: ThemeApplierProps) {
         : ""
     }
 
-    ${animationCss}
+    /* Per-link attention animations — applied via .link-anim-* on individual cards */
+    @keyframes btn-shake {
+      0%, 100% { transform: translateX(0); }
+      15% { transform: translateX(-4px) rotate(-1deg); }
+      30% { transform: translateX(4px) rotate(1deg); }
+      45% { transform: translateX(-3px); }
+      60% { transform: translateX(3px); }
+      75% { transform: translateX(-2px); }
+    }
+    @keyframes btn-pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0,0,0,0.15); }
+      50% { transform: scale(1.025); box-shadow: 0 0 0 6px rgba(0,0,0,0); }
+    }
+    @keyframes btn-bounce {
+      0%, 100% { transform: translateY(0); animation-timing-function: cubic-bezier(0.8,0,1,1); }
+      50% { transform: translateY(-5px); animation-timing-function: cubic-bezier(0,0,0.2,1); }
+    }
+    .link-anim-shake { animation: btn-shake 2.8s ease-in-out infinite; }
+    .link-anim-pulse { animation: btn-pulse 2s ease-in-out infinite; }
+    .link-anim-bounce { animation: btn-bounce 1.6s infinite; }
 
-    /* Scroll-reveal */
+    /* Scroll-reveal — progressive enhancement (hidden only when JS class is present) */
     @keyframes reveal {
       from { opacity: 0; transform: translateY(18px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    .reveal-item { opacity: 0; }
-    .reveal-item.visible { animation: reveal 0.45s ease forwards; }
+    html.reveal-js-ready .reveal-item { opacity: 0; transform: translateY(18px); }
+    html.reveal-js-ready .reveal-item.visible { animation: reveal 0.45s ease forwards; }
   `;
 
   return <style dangerouslySetInnerHTML={{ __html: css }} />;

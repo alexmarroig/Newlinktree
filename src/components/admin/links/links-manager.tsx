@@ -127,6 +127,7 @@ function LinkForm({
       customBgColor: "",
       customTextColor: "",
       customIcon: "",
+      linkAnimation: "none" as LinkSchema["linkAnimation"],
       ...defaultValues,
     },
   });
@@ -232,6 +233,37 @@ function LinkForm({
           </SelectContent>
         </Select>
       </div>
+
+      {/* Animation */}
+      {form.watch("type") !== "divider" && (
+        <div className="space-y-1.5">
+          <Label>Animação de atenção</Label>
+          <div className="flex gap-2">
+            {(
+              [
+                { value: "none", label: "Nenhuma", icon: "—" },
+                { value: "shake", label: "Shake", icon: "↔" },
+                { value: "pulse", label: "Pulse", icon: "◎" },
+                { value: "bounce", label: "Bounce", icon: "↑" },
+              ] as const
+            ).map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => form.setValue("linkAnimation", opt.value)}
+                className={`flex flex-1 flex-col items-center gap-0.5 rounded-xl border-2 py-2 px-1 text-[11px] font-medium transition-all ${
+                  form.watch("linkAnimation") === opt.value
+                    ? "border-gray-900 bg-white shadow-sm"
+                    : "border-transparent bg-gray-100 hover:border-gray-300 hover:bg-white"
+                }`}
+              >
+                <span className="text-base leading-none">{opt.icon}</span>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Thumbnail URL */}
       <div className="space-y-1.5">
@@ -446,6 +478,7 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
       customBgColor: link.custom_bg_color ?? "",
       customTextColor: link.custom_text_color ?? "",
       customIcon: link.custom_icon ?? "",
+      linkAnimation: (link.link_animation ?? "none") as LinkSchema["linkAnimation"],
     };
   }
 
