@@ -679,6 +679,18 @@ export function AppearanceEditor({
             <VisualOption active={bgType === "mesh"} onClick={() => setValue("backgroundType", "mesh")} label="Mesh">
               <div className="h-10 w-full rounded-lg" style={{ background: "radial-gradient(ellipse at 20% 20%, rgba(255,180,180,0.8), transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(180,180,255,0.8), transparent 50%), radial-gradient(ellipse at 50% 85%, rgba(180,255,200,0.7), transparent 50%), #fff" }} />
             </VisualOption>
+            <VisualOption active={bgType === "sunset"} onClick={() => setValue("backgroundType", "sunset")} label="Pôr do sol">
+              <div className="h-10 w-full rounded-lg" style={{ background: "linear-gradient(-45deg, #ff6b6b, #feca57, #ff9ff3, #f9ca24)" }} />
+            </VisualOption>
+            <VisualOption active={bgType === "nebula"} onClick={() => setValue("backgroundType", "nebula")} label="Nebulosa">
+              <div className="h-10 w-full rounded-lg" style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(255,0,128,0.6), transparent 55%), radial-gradient(ellipse at 80% 50%, rgba(0,128,255,0.6), transparent 55%), radial-gradient(ellipse at 50% 10%, rgba(128,0,255,0.5), transparent 55%), #0a0a1a" }} />
+            </VisualOption>
+            <VisualOption active={bgType === "rose"} onClick={() => setValue("backgroundType", "rose")} label="Rosa">
+              <div className="h-10 w-full rounded-lg" style={{ background: "radial-gradient(ellipse at 20% 30%, rgba(255,150,200,0.8), transparent 50%), radial-gradient(ellipse at 80% 70%, rgba(255,100,180,0.7), transparent 50%), #fff5f8" }} />
+            </VisualOption>
+            <VisualOption active={bgType === "neon"} onClick={() => setValue("backgroundType", "neon")} label="Neon">
+              <div className="h-10 w-full rounded-lg" style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(0,255,180,0.4), transparent 55%), radial-gradient(ellipse at 80% 50%, rgba(0,150,255,0.4), transparent 55%), radial-gradient(ellipse at 50% 90%, rgba(200,0,255,0.3), transparent 55%), #060614" }} />
+            </VisualOption>
           </div>
         </div>
 
@@ -741,13 +753,17 @@ export function AppearanceEditor({
         )}
 
         {/* Info for interactive types */}
-        {["gradient", "aurora", "waves", "mesh"].includes(bgType) && (
+        {["gradient", "aurora", "waves", "mesh", "sunset", "nebula", "rose", "neon"].includes(bgType) && (
           <div className="rounded-xl bg-blue-50 border border-blue-100 px-4 py-3">
             <p className="text-[11px] text-blue-700 font-medium">
               {bgType === "gradient" && "Gradiente animado que se move suavemente usando suas cores do tema."}
               {bgType === "aurora" && "Efeito aurora boreal com luzes animadas em fundo escuro."}
               {bgType === "waves" && "Ondas animadas em fundo azul claro — ideal para perfis de saúde e bem-estar."}
-              {bgType === "mesh" && "Gradiente mesh colorido estático com tons pastéis suaves."}
+              {bgType === "mesh" && "Gradiente mesh colorido animado com tons pastéis suaves."}
+              {bgType === "sunset" && "Pôr do sol quente com rosa, laranja e dourado em movimento suave."}
+              {bgType === "nebula" && "Nebulosa espacial com luzes coloridas animadas em fundo escuro."}
+              {bgType === "rose" && "Fundo rosé suave e feminino com movimento de luz animada."}
+              {bgType === "neon" && "Efeito neon futurista com brilho em fundo escuro."}
             </p>
             <p className="text-[10px] text-blue-500 mt-1">Salve para ver na página pública.</p>
           </div>
