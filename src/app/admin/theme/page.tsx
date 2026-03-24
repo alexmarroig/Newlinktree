@@ -28,9 +28,18 @@ export default async function ThemePage() {
 
   const [{ data: theme }, { data: page }, { data: settings }] = await Promise.all([
     supabase.from("themes").select("*").eq("profile_id", profile.id).single(),
-    supabase.from("pages").select("slug").eq("profile_id", profile.id).single(),
+    supabase.from("pages").select("id, slug").eq("profile_id", profile.id).single(),
     supabase.from("settings").select("*").eq("profile_id", profile.id).single(),
   ]);
+
+  const { data: links } = page?.id
+    ? await supabase
+        .from("links")
+        .select("*")
+        .eq("page_id", page.id)
+        .eq("is_enabled", true)
+        .order("position", { ascending: true })
+    : { data: [] };
 
   return (
     // Break out of admin-container padding so the editor fills the full area
@@ -41,6 +50,7 @@ export default async function ThemePage() {
         theme={theme ?? undefined}
         pageSlug={page?.slug ?? ""}
         settings={settings ?? undefined}
+        links={links ?? []}
       />
     </div>
   );
