@@ -123,7 +123,7 @@ export function ThemeApplier({ theme }: ThemeApplierProps) {
   const css = `
     :root {
       --primary: ${theme.primary_color};
-      --primary-foreground: ${theme.background_color};
+      --primary-foreground: ${theme.text_color};
       --secondary: ${theme.secondary_color};
       --secondary-foreground: ${theme.text_color};
       --background: ${theme.background_color};
