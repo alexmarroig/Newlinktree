@@ -101,6 +101,12 @@ export function ThemeApplier({ theme }: ThemeApplierProps) {
         }`
           : bgType === "mesh"
             ? `
+        @keyframes mesh-drift {
+          0%   { background-size: 140% 140%, 130% 130%, 150% 150%, 120% 120%, auto; }
+          33%  { background-size: 160% 160%, 115% 115%, 135% 135%, 145% 145%, auto; }
+          66%  { background-size: 125% 125%, 155% 155%, 120% 120%, 135% 135%, auto; }
+          100% { background-size: 140% 140%, 130% 130%, 150% 150%, 120% 120%, auto; }
+        }
         .public-bg-img {
           background:
             radial-gradient(ellipse at 15% 15%, rgba(255,180,180,0.65) 0%, transparent 50%),
@@ -108,6 +114,7 @@ export function ThemeApplier({ theme }: ThemeApplierProps) {
             radial-gradient(ellipse at 50% 90%, rgba(180,255,200,0.55) 0%, transparent 55%),
             radial-gradient(ellipse at 85% 80%, rgba(255,200,240,0.55) 0%, transparent 50%),
             #ffffff;
+          animation: mesh-drift 18s ease-in-out infinite;
         }`
             : bgType === "image" && theme.background_image_url
               ? `.public-bg-img { background-image: url('${theme.background_image_url}'); background-size: cover; background-position: center; background-attachment: fixed; }`
@@ -183,13 +190,20 @@ export function ThemeApplier({ theme }: ThemeApplierProps) {
     .link-anim-pulse { animation: btn-pulse 2s ease-in-out infinite; }
     .link-anim-bounce { animation: btn-bounce 1.6s infinite; }
 
-    /* Scroll-reveal — progressive enhancement (hidden only when JS class is present) */
+    /* Scroll-reveal — pure CSS staggered animation (no JS, no hydration issues) */
     @keyframes reveal {
-      from { opacity: 0; transform: translateY(18px); }
+      from { opacity: 0; transform: translateY(14px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    html.reveal-js-ready .reveal-item { opacity: 0; transform: translateY(18px); }
-    html.reveal-js-ready .reveal-item.visible { animation: reveal 0.45s ease forwards; }
+    .reveal-item { animation: reveal 0.45s ease both; }
+    .reveal-item:nth-child(1) { animation-delay: 0.05s; }
+    .reveal-item:nth-child(2) { animation-delay: 0.13s; }
+    .reveal-item:nth-child(3) { animation-delay: 0.21s; }
+    .reveal-item:nth-child(4) { animation-delay: 0.29s; }
+    .reveal-item:nth-child(5) { animation-delay: 0.37s; }
+    .reveal-item:nth-child(6) { animation-delay: 0.45s; }
+    .reveal-item:nth-child(7) { animation-delay: 0.53s; }
+    .reveal-item:nth-child(8) { animation-delay: 0.61s; }
   `;
 
   return <style dangerouslySetInnerHTML={{ __html: css }} />;

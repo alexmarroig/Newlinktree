@@ -216,13 +216,6 @@ export function PublicPageRenderer({ data }: PublicPageRendererProps) {
         />
       </TrackingProvider>
 
-      {/* Scroll-reveal script — progressive enhancement */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `(function(){document.documentElement.classList.add('reveal-js-ready');var obs=new IntersectionObserver(function(entries){entries.forEach(function(e,i){if(e.isIntersecting){setTimeout(function(){e.target.classList.add('visible');},i*80);obs.unobserve(e.target);}});},{threshold:0.05});document.querySelectorAll('.reveal-item').forEach(function(el){obs.observe(el);});})();`,
-        }}
-      />
-
       {/* JSON-LD */}
       <script
         type="application/ld+json"
