@@ -35,7 +35,7 @@ import { uploadAvatar } from "@/server/actions/avatar";
 import { uploadBackgroundImage } from "@/server/actions/upload-image";
 import { themeSchema, type ThemeSchema } from "@/lib/validations";
 import { DEFAULT_THEME, APP_URL } from "@/lib/constants";
-import type { Theme, Profile, Settings } from "@/types";
+import type { Theme, Profile, Settings, Link } from "@/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -47,6 +47,7 @@ interface AppearanceEditorProps {
   theme?: Theme;
   pageSlug: string;
   settings?: Settings;
+  links?: Link[];
 }
 
 // ─── Section nav config ───────────────────────────────────────────────────────
@@ -237,11 +238,13 @@ function PhonePreview({
   avatarPreview,
   profileName,
   pageSlug,
+  links,
 }: {
   values: ThemeSchema;
   avatarPreview: string | null;
   profileName: string;
   pageSlug: string;
+  links?: Link[];
 }) {
   const btnBg = values.buttonColor || "#1a1a1a";
   const btnText = values.buttonTextColor || "#ffffff";
@@ -298,10 +301,13 @@ function PhonePreview({
   };
 
   const MOCK_LINKS = ["Link principal", "Segundo link", "Terceiro link"];
+  const previewLinks = links && links.length > 0
+    ? links.filter((l) => l.type !== "divider").slice(0, 6)
+    : null;
 
   return (
     <div
-      className="w-full h-full overflow-hidden flex flex-col items-center pt-5 px-3 gap-2.5"
+      className="w-full h-full overflow-y-auto flex flex-col items-center pt-5 px-3 gap-2.5"
       style={{ ...containerStyle, fontFamily: values.pageFont ? `"${values.pageFont}", sans-serif` : undefined }}
     >
       {/* Inject keyframes for animated types */}
@@ -343,16 +349,31 @@ function PhonePreview({
         </p>
       </div>
 
-      {/* Mock links */}
-      {MOCK_LINKS.map((label, i) => (
-        <div
-          key={i}
-          className="w-full flex items-center justify-center px-3 py-2 text-[9px] font-semibold uppercase tracking-wide"
-          style={btnStyle}
-        >
-          {label}
-        </div>
-      ))}
+      {/* Links */}
+      {previewLinks
+        ? previewLinks.map((link) => (
+            <div
+              key={link.id}
+              className="w-full flex flex-col items-center justify-center px-3 py-2 text-center"
+              style={btnStyle}
+            >
+              <span className="text-[9px] font-semibold leading-tight truncate w-full text-center">
+                {link.label}
+              </span>
+              {link.sublabel && (
+                <span className="text-[8px] opacity-70 mt-0.5 truncate w-full text-center">{link.sublabel}</span>
+              )}
+            </div>
+          ))
+        : MOCK_LINKS.map((label, i) => (
+            <div
+              key={i}
+              className="w-full flex items-center justify-center px-3 py-2 text-[9px] font-semibold uppercase tracking-wide"
+              style={btnStyle}
+            >
+              {label}
+            </div>
+          ))}
 
       {/* Footer hint */}
       <a
@@ -409,6 +430,7 @@ export function AppearanceEditor({
   theme,
   pageSlug,
   settings,
+  links,
 }: AppearanceEditorProps) {
   const [activeSection, setActiveSection] = useState<Section>("header");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile.avatar_url ?? null);
@@ -1068,7 +1090,7 @@ export function AppearanceEditor({
         </div>
 
         {/* ── Right preview ── */}
-        <div className="hidden w-[320px] shrink-0 flex-col items-center gap-4 border-l bg-gray-100 p-5 lg:flex overflow-y-auto">
+        <div className="hidden w-[380px] shrink-0 flex-col items-center gap-4 border-l bg-gray-100 p-5 lg:flex overflow-y-auto">
           <div className="flex w-full items-center justify-between">
             <span className="truncate text-[11px] text-muted-foreground">
               {APP_URL}/{pageSlug}
@@ -1083,15 +1105,16 @@ export function AppearanceEditor({
             </a>
           </div>
           {/* Phone frame — live preview (updates instantly) */}
-          <div className="relative w-[240px] rounded-[36px] border-[6px] border-gray-800 bg-gray-800 shadow-2xl overflow-hidden">
+          <div className="relative w-full rounded-[36px] border-[6px] border-gray-800 bg-gray-800 shadow-2xl overflow-hidden">
             {/* Notch */}
             <div className="absolute top-0 left-1/2 z-10 h-5 w-20 -translate-x-1/2 rounded-b-2xl bg-gray-800" />
-            <div className="h-[480px] overflow-hidden rounded-[30px] bg-white">
+            <div className="min-h-[520px] overflow-hidden rounded-[30px] bg-white">
               <PhonePreview
                 values={watch()}
                 avatarPreview={avatarPreview}
                 profileName={profile.name}
                 pageSlug={pageSlug}
+                links={links}
               />
             </div>
           </div>
