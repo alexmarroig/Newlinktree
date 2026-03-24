@@ -31,7 +31,7 @@ export function LinksPhonePreview({ links, profile, theme }: LinksPhonePreviewPr
   return (
     <div className="flex h-full flex-col items-center justify-center px-4 py-6">
       {/* URL bar */}
-      <div className="mb-3 flex w-full max-w-[260px] items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5">
+      <div className="mb-3 flex w-full max-w-[300px] items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5">
         <div className="h-2 w-2 rounded-full bg-green-400" />
         <span className="truncate text-[10px] text-gray-500">
           {profile ? `biohub.app/${profile.name?.toLowerCase().replace(/\s+/g, "-")}` : "sua-pagina"}
@@ -40,8 +40,8 @@ export function LinksPhonePreview({ links, profile, theme }: LinksPhonePreviewPr
 
       {/* Phone frame */}
       <div
-        className="relative w-full max-w-[260px] overflow-hidden rounded-[32px] border-[6px] border-gray-800 shadow-2xl"
-        style={{ height: "520px" }}
+        className="relative w-full max-w-[300px] overflow-hidden rounded-[32px] border-[6px] border-gray-800 shadow-2xl"
+        style={{ height: "560px" }}
       >
         {/* Phone content */}
         <div
