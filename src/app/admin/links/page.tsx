@@ -5,7 +5,7 @@ import { LinksManager } from "@/components/admin/links/links-manager";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Links & CTAs",
+  title: "Conteúdo",
   robots: "noindex",
 };
 
@@ -20,26 +20,43 @@ export default async function LinksPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id")
+    .select("*")
     .eq("user_id", user.id)
     .single();
 
-  if (!profile) redirect("/admin");
+  if (!profile) redirect("/admin/settings");
 
   const { data: page } = await supabase
     .from("pages")
-    .select("id")
+    .select("id, slug")
     .eq("profile_id", profile.id)
     .limit(1)
     .single();
 
-  if (!page) redirect("/admin");
+  if (!page) redirect("/admin/settings");
 
-  const { data: links } = await supabase
-    .from("links")
-    .select("*")
-    .eq("page_id", page.id)
-    .order("position", { ascending: true });
+  const [{ data: links }, { data: theme }] = await Promise.all([
+    supabase
+      .from("links")
+      .select("*")
+      .eq("page_id", page.id)
+      .order("position", { ascending: true }),
+    supabase
+      .from("themes")
+      .select("*")
+      .eq("profile_id", profile.id)
+      .single(),
+  ]);
 
-  return <LinksManager pageId={page.id} links={links ?? []} />;
+  return (
+    <div className="-m-6">
+      <LinksManager
+        pageId={page.id}
+        pageSlug={page.slug}
+        links={links ?? []}
+        profile={profile}
+        theme={theme ?? undefined}
+      />
+    </div>
+  );
 }

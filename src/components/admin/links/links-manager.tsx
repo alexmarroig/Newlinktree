@@ -41,11 +41,15 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { createLink, updateLink, toggleLink, deleteLink } from "@/server/actions/links";
 import { linkSchema, type LinkSchema } from "@/lib/validations";
-import type { Link } from "@/types";
+import type { Link, Profile, Theme } from "@/types";
+import { LinksPhonePreview } from "./links-phone-preview";
 
 interface LinksManagerProps {
   pageId: string;
+  pageSlug?: string;
   links: Link[];
+  profile?: Profile;
+  theme?: Theme;
 }
 
 const ADMIN_ICON_CONFIG: Record<string, { Icon: React.ElementType; bg: string; color: string }> = {
@@ -401,7 +405,7 @@ function LinkForm({
 
 // ─── Main component ─────────────────────────────────────────────────────────
 
-export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps) {
+export function LinksManager({ pageId, pageSlug, links: initialLinks, profile, theme }: LinksManagerProps) {
   const [links, setLinks] = useState(initialLinks);
   const [createOpen, setCreateOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<Link | null>(null);
@@ -483,118 +487,139 @@ export function LinksManager({ pageId, links: initialLinks }: LinksManagerProps)
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-heading text-2xl font-semibold">Links & CTAs</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Gerencie os botões e links da sua página
-          </p>
+    <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
+      {/* Left: links list */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-border px-6 py-4">
+          <div>
+            <h1 className="font-heading text-xl font-semibold">Conteúdo</h1>
+            <p className="text-sm text-muted-foreground">
+              Gerencie os botões e links da sua página
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {pageSlug && (
+              <Button variant="outline" size="sm" asChild>
+                <a href={`/${pageSlug}`} target="_blank" rel="noopener noreferrer">
+                  Ver página
+                </a>
+              </Button>
+            )}
+            <Button size="sm" onClick={() => setCreateOpen(true)}>
+              <Plus className="h-4 w-4" />
+              Novo link
+            </Button>
+          </div>
         </div>
-        <Button size="sm" onClick={() => setCreateOpen(true)}>
-          <Plus className="h-4 w-4" />
-          Novo link
-        </Button>
+
+        {/* Links list */}
+        <div className="flex-1 overflow-y-auto p-6">
+          <Card variant="elevated">
+            <CardHeader>
+              <CardTitle className="text-base">
+                {links.length} link{links.length !== 1 ? "s" : ""} cadastrado{links.length !== 1 ? "s" : ""}
+              </CardTitle>
+            </CardHeader>
+            <CardContent padding="none">
+              {links.length === 0 ? (
+                <div className="flex flex-col items-center gap-3 py-12 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Nenhum link cadastrado. Clique em &ldquo;Novo link&rdquo; para adicionar.
+                  </p>
+                </div>
+              ) : (
+                <ul className="divide-y divide-border">
+                  {links.map((link) => (
+                    <li
+                      key={link.id}
+                      className={`flex items-center gap-4 px-6 py-4 transition-colors hover:bg-muted/30 ${!link.is_enabled ? "opacity-60" : ""}`}
+                    >
+                      {/* Link-type icon */}
+                      {link.thumbnail_url ? (
+                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border">
+                          <Image
+                            src={link.thumbnail_url}
+                            alt=""
+                            width={40}
+                            height={40}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      ) : (() => {
+                        const iconCfg = ADMIN_ICON_CONFIG[link.type] ?? ADMIN_ICON_CONFIG.default;
+                        return (
+                          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${iconCfg.bg}`}>
+                            <iconCfg.Icon className={`h-5 w-5 ${iconCfg.color}`} />
+                          </div>
+                        );
+                      })()}
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="truncate text-sm font-semibold text-foreground">
+                            {link.label}
+                          </p>
+                          <Badge variant={VARIANT_COLORS[link.variant] ?? "muted"} className="text-[10px]">
+                            {link.variant}
+                          </Badge>
+                        </div>
+                        {link.sublabel && (
+                          <p className="truncate text-xs text-muted-foreground">{link.sublabel}</p>
+                        )}
+                        <div className="mt-1 flex flex-wrap items-center gap-2">
+                          <Badge variant="outline" className="text-[10px]">
+                            {TYPE_LABELS[link.type] ?? link.type}
+                          </Badge>
+                          <span className={`text-[11px] font-medium tabular-nums ${link.click_count > 0 ? "text-blue-600" : "text-muted-foreground"}`}>
+                            {link.click_count} clique{link.click_count !== 1 ? "s" : ""}
+                          </span>
+                          {link.url && (
+                            <span className="max-w-[200px] truncate text-[11px] text-muted-foreground">
+                              {link.url}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex shrink-0 items-center gap-1.5">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => setEditingLink(link)}
+                          className="text-muted-foreground hover:text-foreground"
+                          title="Editar"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Switch
+                          checked={link.is_enabled}
+                          onCheckedChange={() => handleToggle(link.id)}
+                          aria-label={link.is_enabled ? "Desativar" : "Ativar"}
+                        />
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => handleDelete(link.id)}
+                          className="text-muted-foreground hover:text-destructive"
+                          title="Deletar"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      <Card variant="elevated">
-        <CardHeader>
-          <CardTitle className="text-base">
-            {links.length} link{links.length !== 1 ? "s" : ""} cadastrado{links.length !== 1 ? "s" : ""}
-          </CardTitle>
-        </CardHeader>
-        <CardContent padding="none">
-          {links.length === 0 ? (
-            <div className="flex flex-col items-center gap-3 py-12 text-center">
-              <p className="text-sm text-muted-foreground">
-                Nenhum link cadastrado. Clique em &ldquo;Novo link&rdquo; para adicionar.
-              </p>
-            </div>
-          ) : (
-            <ul className="divide-y divide-border">
-              {links.map((link) => (
-                <li
-                  key={link.id}
-                  className={`flex items-center gap-4 px-6 py-4 transition-colors hover:bg-muted/30 ${!link.is_enabled ? "opacity-60" : ""}`}
-                >
-                  {/* Link-type icon */}
-                  {link.thumbnail_url ? (
-                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border">
-                      <Image
-                        src={link.thumbnail_url}
-                        alt=""
-                        width={40}
-                        height={40}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  ) : (() => {
-                    const iconCfg = ADMIN_ICON_CONFIG[link.type] ?? ADMIN_ICON_CONFIG.default;
-                    return (
-                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${iconCfg.bg}`}>
-                        <iconCfg.Icon className={`h-5 w-5 ${iconCfg.color}`} />
-                      </div>
-                    );
-                  })()}
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="truncate text-sm font-semibold text-foreground">
-                        {link.label}
-                      </p>
-                      <Badge variant={VARIANT_COLORS[link.variant] ?? "muted"} className="text-[10px]">
-                        {link.variant}
-                      </Badge>
-                    </div>
-                    {link.sublabel && (
-                      <p className="truncate text-xs text-muted-foreground">{link.sublabel}</p>
-                    )}
-                    <div className="mt-1 flex flex-wrap items-center gap-2">
-                      <Badge variant="outline" className="text-[10px]">
-                        {TYPE_LABELS[link.type] ?? link.type}
-                      </Badge>
-                      <span className={`text-[11px] font-medium tabular-nums ${link.click_count > 0 ? "text-blue-600" : "text-muted-foreground"}`}>
-                        {link.click_count} clique{link.click_count !== 1 ? "s" : ""}
-                      </span>
-                      {link.url && (
-                        <span className="max-w-[200px] truncate text-[11px] text-muted-foreground">
-                          {link.url}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex shrink-0 items-center gap-1.5">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => setEditingLink(link)}
-                      className="text-muted-foreground hover:text-foreground"
-                      title="Editar"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                    <Switch
-                      checked={link.is_enabled}
-                      onCheckedChange={() => handleToggle(link.id)}
-                      aria-label={link.is_enabled ? "Desativar" : "Ativar"}
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => handleDelete(link.id)}
-                      className="text-muted-foreground hover:text-destructive"
-                      title="Deletar"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+      {/* Right: phone preview */}
+      <div className="hidden w-[320px] shrink-0 border-l border-border bg-muted/20 lg:flex">
+        <LinksPhonePreview links={links} profile={profile} theme={theme} />
+      </div>
 
       {/* ── Dialog: criar link ── */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
