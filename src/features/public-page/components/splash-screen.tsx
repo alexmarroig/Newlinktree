@@ -73,12 +73,14 @@ export function SplashScreen({
   const [resolvedPhrase, setResolvedPhrase] = useState("");
 
   useEffect(() => {
-    if (!shouldShow(intervalDays)) {
+    const force = new URLSearchParams(window.location.search).has("splash");
+
+    if (!force && !shouldShow(intervalDays)) {
       setStage("out");
       return;
     }
 
-    markShown();
+    if (!force) markShown();
     setResolvedPhrase(phrase ?? getAutoPhrase());
     setStage(0);
 
