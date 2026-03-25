@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import {
@@ -221,16 +221,55 @@ function ColorPickerButton({
 }
 
 // ─── PhonePreview ─────────────────────────────────────────────────────────────
-// Live preview component — reads directly from form state, no save needed
+// Live preview — reacts to every form change via useWatch
 
 const PREVIEW_ROUNDNESS: Record<string, string> = {
-  square: "4px", round: "8px", rounder: "16px", full: "9999px",
+  none: "0px", square: "4px", round: "8px", rounder: "16px", full: "9999px",
 };
 const PREVIEW_SHADOW: Record<string, string> = {
   none: "none",
   soft: "0 2px 8px rgba(0,0,0,0.15)",
   strong: "0 4px 16px rgba(0,0,0,0.25)",
   hard: "4px 4px 0px rgba(0,0,0,0.85)",
+};
+
+// Single keyframe block — defined once, injected always
+const PREVIEW_KEYFRAMES = `
+  @keyframes ph-blob-1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(25%,20%) scale(1.3);}}
+  @keyframes ph-blob-2{0%,100%{transform:translate(0,0) scale(1.1);}50%{transform:translate(-20%,25%) scale(0.85);}}
+  @keyframes ph-blob-3{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(15%,-20%) scale(1.15);}}
+  @keyframes ph-wave{0%{background-position:0px 75%;}100%{background-position:-800px 75%;}}
+  @keyframes ph-grad{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
+`;
+
+type BlobDef = { color: string; w: string; h: string; top?: string; left?: string; right?: string; bottom?: string; anim: string; dur: string };
+type BlobConfig = { base: string; blobs: BlobDef[] };
+
+const BLOB_CONFIGS: Record<string, BlobConfig> = {
+  aurora: { base: "#0e1628", blobs: [
+    { color: "rgba(0,210,255,0.55)", w: "90%", h: "90%", top: "-25%", left: "-25%", anim: "ph-blob-1", dur: "8s" },
+    { color: "rgba(180,0,255,0.50)", w: "80%", h: "80%", top: "30%",  right: "-25%", anim: "ph-blob-2", dur: "10s" },
+    { color: "rgba(0,255,180,0.40)", w: "70%", h: "70%", bottom: "-15%", left: "25%", anim: "ph-blob-3", dur: "12s" },
+  ]},
+  nebula: { base: "#0a0a1a", blobs: [
+    { color: "rgba(255,0,128,0.55)", w: "80%", h: "80%", top: "-20%", left: "-20%", anim: "ph-blob-1", dur: "9s" },
+    { color: "rgba(0,128,255,0.55)", w: "70%", h: "70%", top: "20%",  right: "-20%", anim: "ph-blob-2", dur: "11s" },
+    { color: "rgba(128,0,255,0.50)", w: "65%", h: "65%", bottom: "-15%", left: "20%", anim: "ph-blob-3", dur: "7s" },
+  ]},
+  neon: { base: "#060614", blobs: [
+    { color: "rgba(0,255,180,0.45)", w: "75%", h: "75%", top: "-20%", left: "-20%", anim: "ph-blob-1", dur: "7s" },
+    { color: "rgba(0,150,255,0.45)", w: "65%", h: "65%", top: "25%",  right: "-20%", anim: "ph-blob-2", dur: "9s" },
+    { color: "rgba(200,0,255,0.40)", w: "60%", h: "60%", bottom: "-15%", left: "20%", anim: "ph-blob-3", dur: "11s" },
+  ]},
+  mesh: { base: "#ffffff", blobs: [
+    { color: "rgba(255,180,180,0.70)", w: "80%", h: "80%", top: "-20%", left: "-20%", anim: "ph-blob-1", dur: "10s" },
+    { color: "rgba(180,180,255,0.70)", w: "70%", h: "70%", top: "20%",  right: "-20%", anim: "ph-blob-2", dur: "12s" },
+    { color: "rgba(180,255,200,0.65)", w: "60%", h: "60%", bottom: "-15%", left: "20%", anim: "ph-blob-3", dur: "8s" },
+  ]},
+  rose: { base: "#fff5f8", blobs: [
+    { color: "rgba(255,150,200,0.75)", w: "80%", h: "80%", top: "-20%", left: "-20%", anim: "ph-blob-1", dur: "9s" },
+    { color: "rgba(255,100,180,0.65)", w: "65%", h: "65%", bottom: "-15%", right: "-15%", anim: "ph-blob-2", dur: "11s" },
+  ]},
 };
 
 function PhonePreview({
@@ -246,144 +285,128 @@ function PhonePreview({
   pageSlug: string;
   links?: Link[];
 }) {
+  if (!values) return null;
+
   const btnBg = values.buttonColor || "#1a1a1a";
   const btnText = values.buttonTextColor || "#ffffff";
-  const radius = PREVIEW_ROUNDNESS[values.buttonRoundness] ?? "9999px";
-  const shadow = PREVIEW_SHADOW[values.buttonShadow] ?? "none";
-  const bgType = values.backgroundType;
+  const radius = PREVIEW_ROUNDNESS[values.buttonRoundness ?? "full"] ?? "9999px";
+  const shadow = PREVIEW_SHADOW[values.buttonShadow ?? "soft"] ?? "none";
+  const bgType = values.backgroundType ?? "color";
+  const isDark = ["aurora", "nebula", "neon"].includes(bgType);
 
-  // Compute background style based on type
-  let containerStyle: React.CSSProperties = {};
-  let isAurora = false;
-  if (bgType === "image" && values.backgroundImageUrl) {
-    containerStyle = { backgroundImage: `url(${values.backgroundImageUrl})`, backgroundSize: "cover", backgroundPosition: "center" };
-  } else if (bgType === "gradient") {
-    containerStyle = {
-      background: `linear-gradient(-45deg, hsl(${values.backgroundColor}), #EAF0FF, ${btnBg}22, hsl(${values.backgroundColor}))`,
-      backgroundSize: "300% 300%",
-      animation: "bg-grad-preview 14s ease infinite",
-    };
-  } else if (bgType === "aurora") {
-    isAurora = true;
-    containerStyle = {
-      background: "radial-gradient(ellipse 110% 80% at 0% 50%, rgba(0,210,255,0.45), transparent 60%), radial-gradient(ellipse 110% 80% at 100% 50%, rgba(180,0,255,0.40), transparent 60%), radial-gradient(ellipse 80% 60% at 50% 100%, rgba(0,255,180,0.30), transparent 60%), #0e1628",
-      backgroundSize: "200% 200%, 200% 200%, 200% 200%, auto",
-      animation: "aurora-glow-preview 18s ease-in-out infinite",
-    };
-  } else if (bgType === "waves") {
-    containerStyle = {
-      backgroundColor: "#E8F4FD",
-      backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 80'%3E%3Cpath fill='rgba(59%2C130%2C246%2C0.25)' d='M0,40 C100,10 300,70 500,35 C650,10 750,60 800,40 L800,80 L0,80Z'/%3E%3C/svg%3E\")",
-      backgroundRepeat: "repeat-x",
-      backgroundSize: "800px 100px",
-      backgroundPosition: "0px 85%",
-    };
-  } else if (bgType === "mesh") {
-    containerStyle = {
-      background: "radial-gradient(ellipse at 15% 15%, rgba(255,180,180,0.65), transparent 50%), radial-gradient(ellipse at 85% 10%, rgba(180,180,255,0.65), transparent 50%), radial-gradient(ellipse at 50% 90%, rgba(180,255,200,0.55), transparent 55%), #ffffff",
-    };
-  } else {
-    containerStyle = { backgroundColor: `hsl(${values.backgroundColor})` };
-  }
-
-  const textColor = values.pageFontColor || (isAurora ? "#ffffff" : `hsl(${values.textColor})`);
+  const textColor = values.pageFontColor || (isDark ? "#ffffff" : `hsl(${values.textColor})`);
   const titleColor = values.titleFontColor || textColor;
 
-  const initials = profileName
-    .split(" ").filter(Boolean).slice(0, 2)
-    .map((n) => n[0]!.toUpperCase()).join("");
+  // Button style variants
+  const btnStyle: React.CSSProperties = (() => {
+    const base = { borderRadius: radius, boxShadow: shadow };
+    switch (values.buttonStyle) {
+      case "glass":
+        return { ...base, backgroundColor: isDark ? "rgba(255,255,255,0.15)" : `${btnBg}28`, backdropFilter: "blur(8px)", border: `1px solid ${isDark ? "rgba(255,255,255,0.3)" : `${btnBg}55`}`, color: isDark ? "#fff" : btnBg };
+      case "outline":
+        return { ...base, backgroundColor: "transparent", border: `2px solid ${btnBg}`, color: btnBg };
+      default:
+        return { ...base, backgroundColor: btnBg, color: btnText };
+    }
+  })();
 
-  const btnStyle: React.CSSProperties = {
-    backgroundColor: btnBg,
-    color: btnText,
-    borderRadius: radius,
-    boxShadow: shadow,
-  };
-
+  const initials = profileName.split(" ").filter(Boolean).slice(0, 2).map((n) => n[0]!.toUpperCase()).join("");
+  const previewLinks = links && links.length > 0 ? links.filter((l) => l.type !== "divider").slice(0, 6) : null;
   const MOCK_LINKS = ["Link principal", "Segundo link", "Terceiro link"];
-  const previewLinks = links && links.length > 0
-    ? links.filter((l) => l.type !== "divider").slice(0, 6)
-    : null;
+
+  // Container background (for non-blob types)
+  let containerBg: React.CSSProperties = {};
+  if (bgType === "image" && values.backgroundImageUrl) {
+    containerBg = { backgroundImage: `url(${values.backgroundImageUrl})`, backgroundSize: "cover", backgroundPosition: "center" };
+  } else if (bgType === "gradient") {
+    containerBg = { background: `linear-gradient(-45deg, hsl(${values.backgroundColor}), #EAF0FF, hsl(${values.backgroundColor}))`, backgroundSize: "300% 300%", animation: "ph-grad 8s ease infinite" };
+  } else if (bgType === "waves") {
+    containerBg = { backgroundColor: "#E8F4FD", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 80'%3E%3Cpath fill='rgba(59%2C130%2C246%2C0.25)' d='M0,40 C100,10 300,70 500,35 C650,10 750,60 800,40 L800,80 L0,80Z'/%3E%3C/svg%3E\")", backgroundRepeat: "repeat-x", backgroundSize: "800px 100px", animation: "ph-wave 6s linear infinite" };
+  } else if (bgType === "sunset") {
+    containerBg = { background: "linear-gradient(-45deg, #ff6b6b, #feca57, #ff9ff3, #f9ca24, #ff6b6b)", backgroundSize: "300% 300%", animation: "ph-grad 6s ease infinite" };
+  } else if (BLOB_CONFIGS[bgType]) {
+    containerBg = { backgroundColor: BLOB_CONFIGS[bgType]!.base };
+  } else {
+    containerBg = { backgroundColor: `hsl(${values.backgroundColor ?? "0 0% 100%"})` };
+  }
+
+  const blobConfig = BLOB_CONFIGS[bgType];
+  const isHero = values.avatarLayout === "hero";
+
+  const AvatarEl = (
+    <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border-2 border-white shadow-md">
+      {avatarPreview
+        // eslint-disable-next-line @next/next/no-img-element
+        ? <img src={avatarPreview} alt="" className="h-full w-full object-cover object-top" />
+        : <div className="flex h-full w-full items-center justify-center bg-gray-200"><span className="text-base font-semibold text-gray-500">{initials}</span></div>
+      }
+    </div>
+  );
 
   return (
     <div
-      className="w-full h-full overflow-y-auto flex flex-col items-center pt-5 px-3 gap-2.5"
-      style={{ ...containerStyle, fontFamily: values.pageFont ? `"${values.pageFont}", sans-serif` : undefined }}
+      className="relative w-full h-full overflow-hidden"
+      style={{ fontFamily: values.pageFont ? `"${values.pageFont}", sans-serif` : undefined, ...containerBg }}
     >
-      {/* Inject keyframes for animated types */}
-      {(bgType === "gradient" || bgType === "aurora") && (
-        <style>{`
-          @keyframes bg-grad-preview {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-          }
-          @keyframes aurora-glow-preview {
-            0%, 100% { background-position: 0% 50%, 100% 50%, 50% 100%; }
-            33% { background-position: 50% 0%, 50% 100%, 0% 50%; }
-            66% { background-position: 100% 50%, 0% 50%, 100% 0%; }
-          }
-        `}</style>
-      )}
-      {/* Avatar */}
-      <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border-2 border-white shadow-md">
-        {avatarPreview ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={avatarPreview} alt="" className="h-full w-full object-cover object-top" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gray-200">
-            <span className="text-base font-semibold text-gray-500">{initials}</span>
+      {/* Always inject keyframes */}
+      <style>{PREVIEW_KEYFRAMES}</style>
+
+      {/* Animated blobs (for aurora, nebula, neon, mesh, rose) */}
+      {blobConfig?.blobs.map((blob, i) => (
+        <div key={i} style={{ position: "absolute", width: blob.w, height: blob.h, borderRadius: "50%", background: blob.color, filter: "blur(45px)", top: blob.top, left: blob.left, right: blob.right, bottom: blob.bottom, animation: `${blob.anim} ${blob.dur} ease-in-out infinite` }} />
+      ))}
+
+      {/* Scrollable content above blobs */}
+      <div
+        className="relative z-10 flex flex-col items-center px-3 gap-2.5 overflow-y-auto h-full pb-4"
+        style={{ paddingTop: isHero ? "0" : "20px" }}
+      >
+        {/* Hero layout: colored banner + avatar overlap */}
+        {isHero ? (
+          <div className="w-full flex items-end justify-center mb-0" style={{ height: 80, background: `linear-gradient(to bottom, ${btnBg}cc, ${btnBg}22)`, marginLeft: "-12px", marginRight: "-12px", width: "calc(100% + 24px)" }}>
+            <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-white shadow-md" style={{ marginBottom: "-20px", flexShrink: 0 }}>
+              {avatarPreview
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={avatarPreview} alt="" className="h-full w-full object-cover object-top" />
+                : <div className="flex h-full w-full items-center justify-center bg-gray-200"><span className="text-base font-semibold text-gray-500">{initials}</span></div>
+              }
+            </div>
+          </div>
+        ) : AvatarEl}
+
+        {/* Name + title */}
+        <div className={cn("text-center leading-tight", isHero && "mt-6")}>
+          <p className={`font-bold ${values.titleSize === "large" ? "text-[13px]" : "text-[11px]"}`} style={{ color: titleColor }}>
+            {profileName}
+          </p>
+          <p className="text-[9px] mt-0.5 opacity-60" style={{ color: textColor }}>Psicóloga</p>
+        </div>
+
+        {/* Availability badge */}
+        {values.profileBadgeText && (
+          <div className="rounded-full px-2.5 py-0.5 text-[8px] font-semibold" style={{ backgroundColor: `${btnBg}22`, color: btnBg, border: `1px solid ${btnBg}44` }}>
+            {values.profileBadgeText}
           </div>
         )}
+
+        {/* Links */}
+        {previewLinks
+          ? previewLinks.map((link) => (
+              <div key={link.id} className="w-full flex flex-col items-center justify-center px-3 py-2 text-center" style={btnStyle}>
+                <span className="text-[9px] font-semibold leading-tight truncate w-full text-center">{link.label}</span>
+                {link.sublabel && <span className="text-[8px] opacity-70 mt-0.5 truncate w-full text-center">{link.sublabel}</span>}
+              </div>
+            ))
+          : MOCK_LINKS.map((label, i) => (
+              <div key={i} className="w-full flex items-center justify-center px-3 py-2 text-[9px] font-semibold uppercase tracking-wide" style={btnStyle}>{label}</div>
+            ))
+        }
+
+        {/* Footer */}
+        <a href={`/${pageSlug}`} target="_blank" rel="noopener noreferrer" className="mt-auto mb-2 text-[9px] text-gray-400 hover:text-gray-600 underline">
+          Ver página completa ↗
+        </a>
       </div>
-
-      {/* Name */}
-      <div className="text-center leading-tight">
-        <p
-          className={`font-bold ${values.titleSize === "large" ? "text-[13px]" : "text-[11px]"}`}
-          style={{ color: titleColor }}
-        >
-          {profileName}
-        </p>
-        <p className="text-[9px] mt-0.5 opacity-60" style={{ color: textColor }}>
-          Psicóloga
-        </p>
-      </div>
-
-      {/* Links */}
-      {previewLinks
-        ? previewLinks.map((link) => (
-            <div
-              key={link.id}
-              className="w-full flex flex-col items-center justify-center px-3 py-2 text-center"
-              style={btnStyle}
-            >
-              <span className="text-[9px] font-semibold leading-tight truncate w-full text-center">
-                {link.label}
-              </span>
-              {link.sublabel && (
-                <span className="text-[8px] opacity-70 mt-0.5 truncate w-full text-center">{link.sublabel}</span>
-              )}
-            </div>
-          ))
-        : MOCK_LINKS.map((label, i) => (
-            <div
-              key={i}
-              className="w-full flex items-center justify-center px-3 py-2 text-[9px] font-semibold uppercase tracking-wide"
-              style={btnStyle}
-            >
-              {label}
-            </div>
-          ))}
-
-      {/* Footer hint */}
-      <a
-        href={`/${pageSlug}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-auto mb-2 text-[9px] text-gray-400 hover:text-gray-600 underline"
-      >
-        Ver página completa ↗
-      </a>
     </div>
   );
 }
@@ -473,7 +496,8 @@ export function AppearanceEditor({
     },
   });
 
-  const { watch, setValue, handleSubmit, formState } = form;
+  const { watch, setValue, handleSubmit, formState, control } = form;
+  const previewValues = useWatch({ control }) as ThemeSchema;
 
   async function onSave(values: ThemeSchema) {
     const result = await saveTheme(profileId, values);
@@ -1110,7 +1134,7 @@ export function AppearanceEditor({
             <div className="absolute top-0 left-1/2 z-10 h-5 w-20 -translate-x-1/2 rounded-b-2xl bg-gray-800" />
             <div className="min-h-[520px] overflow-hidden rounded-[30px] bg-white">
               <PhonePreview
-                values={watch()}
+                values={previewValues}
                 avatarPreview={avatarPreview}
                 profileName={profile.name}
                 pageSlug={pageSlug}
