@@ -266,6 +266,198 @@
            placeholder:text-muted-foreground
            focus:border-primary/50 focus:ring-2 focus:ring-primary/20;
   }
+
+  /* ── Splash Screen ────────────────────────────────────────────────────────── */
+
+  .splash-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: linear-gradient(160deg, #0d0d2b 0%, #1e1b4b 25%, #4c1d95 55%, #7c3aed 75%, #c4b5fd 90%, #ede9fe 100%);
+    background-size: 200% 200%;
+    animation: ph-grad 14s ease infinite;
+  }
+
+  .splash-exit {
+    animation: splash-fade-out 0.75s ease forwards !important;
+  }
+
+  .splash-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(65px);
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .splash-orb-1 {
+    width: min(65vw, 480px);
+    height: min(65vw, 480px);
+    background: rgba(139, 92, 246, 0.5);
+    top: -18%;
+    left: -18%;
+    animation: splash-orb-drift-1 9s ease-in-out infinite;
+  }
+
+  .splash-orb-2 {
+    width: min(55vw, 420px);
+    height: min(55vw, 420px);
+    background: rgba(217, 70, 239, 0.38);
+    bottom: -12%;
+    right: -12%;
+    animation: splash-orb-drift-2 12s ease-in-out infinite;
+  }
+
+  .splash-orb-3 {
+    width: min(45vw, 360px);
+    height: min(45vw, 360px);
+    background: rgba(99, 102, 241, 0.32);
+    bottom: 18%;
+    left: 18%;
+    animation: splash-orb-drift-3 8s ease-in-out infinite;
+  }
+
+  .splash-breathe-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    animation: splash-breathe 3.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .splash-breathe-ring-outer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    animation: splash-breathe 3.5s ease-in-out infinite 0.4s;
+    pointer-events: none;
+  }
+
+  .splash-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 36px;
+    padding: 32px 24px;
+    text-align: center;
+    max-width: 380px;
+    width: 100%;
+  }
+
+  .splash-phrase {
+    font-size: clamp(1.2rem, 4.5vw, 1.45rem);
+    font-weight: 300;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.9);
+    letter-spacing: 0.015em;
+    max-width: 310px;
+    animation: splash-reveal 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .splash-identity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    animation: splash-reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .splash-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.45);
+    box-shadow:
+      0 0 0 5px rgba(255, 255, 255, 0.08),
+      0 12px 40px rgba(0, 0, 0, 0.4);
+    animation: splash-avatar-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .splash-name-block {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .splash-name {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.95);
+    letter-spacing: 0.025em;
+  }
+
+  .splash-title {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .splash-divider {
+    width: 30px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 1px;
+  }
+}
+
+/* ── Splash keyframes (outside @layer so they work with animation names) ────── */
+
+@keyframes splash-orb-drift-1 {
+  0%,  100% { transform: translate(0, 0)        scale(1);    }
+  33%       { transform: translate(9%, 7%)       scale(1.09); }
+  66%       { transform: translate(-6%, -9%)     scale(0.93); }
+}
+
+@keyframes splash-orb-drift-2 {
+  0%,  100% { transform: translate(0, 0)         scale(1.05); }
+  33%       { transform: translate(-11%, 6%)      scale(0.91); }
+  66%       { transform: translate(8%, -5%)       scale(1.12); }
+}
+
+@keyframes splash-orb-drift-3 {
+  0%,  100% { transform: translate(0, 0)    scale(1);    }
+  50%       { transform: translate(6%, -11%) scale(1.14); }
+}
+
+@keyframes splash-breathe {
+  0%,  100% { transform: translate(-50%, -50%) scale(0.97); opacity: 0.4; }
+  50%        { transform: translate(-50%, -50%) scale(1.04); opacity: 0.65; }
+}
+
+@keyframes splash-reveal {
+  from { opacity: 0; transform: translateY(16px); filter: blur(5px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0);   }
+}
+
+@keyframes splash-avatar-in {
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1);    }
+}
+
+@keyframes splash-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; pointer-events: none; }
 }
 
 @layer utilities {
