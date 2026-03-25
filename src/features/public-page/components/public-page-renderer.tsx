@@ -6,6 +6,7 @@ import { TrackingProvider } from "./tracking-provider";
 import { LinktreeLinkCard } from "./linktree-link-card";
 import { ThemeApplier } from "./theme-applier";
 import { FloatingCta } from "./floating-cta";
+import { SplashScreen } from "./splash-screen";
 
 interface PublicPageRendererProps {
   data: PageData;
@@ -39,6 +40,14 @@ export function PublicPageRenderer({ data }: PublicPageRendererProps) {
   return (
     <>
       {theme && <ThemeApplier theme={theme} />}
+
+      {/* Splash screen emocional — overlay fixo, só na primeira visita */}
+      <SplashScreen
+        avatarUrl={profile.avatar_url}
+        name={profile.name}
+        title={profile.professional_title}
+      />
+
       <TrackingProvider slug={page.slug}>
         {/* ── PAGE WRAPPER ── */}
         <div
