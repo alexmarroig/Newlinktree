@@ -296,46 +296,47 @@ INSERT INTO public.links (
 INSERT INTO public.faq_items (page_id, question, answer, position) VALUES
 (
   v_page_id,
-  'Como funciona a primeira sessão?',
-  'A primeira sessão é um espaço de acolhimento e escuta. Conversamos sobre o que te trouxe até aqui, suas expectativas e como posso te ajudar. Não há roteiro fixo — é um encontro genuíno para começarmos a nos conhecer. Você pode trazer o que quiser e no ritmo que preferir.',
+  'Nunca fiz terapia, como é a primeira sessão?',
+  'É uma conversa tranquila para te conhecer e entender o que você está vivendo. Você não precisa chegar sabendo o que dizer: eu te ajudo a organizar isso com calma.',
   0
 ),
 (
   v_page_id,
-  'Com que frequência acontecem as sessões?',
-  'As sessões geralmente ocorrem uma vez por semana, com duração de 50 minutos cada. Essa regularidade é importante para a continuidade e profundidade do processo terapêutico. Eventualmente, pode-se ajustar a frequência conforme as necessidades do processo.',
+  'Como sei se você é a psicóloga certa para mim?',
+  'Essa dúvida é muito comum. Nas primeiras sessões você percebe se se sente acolhida, respeitada e à vontade. Se não fizer sentido, tudo bem: posso te orientar em outros caminhos.',
   1
 ),
 (
   v_page_id,
-  'O atendimento online é tão eficaz quanto o presencial?',
-  'Sim. Diversas pesquisas confirmam a eficácia da psicoterapia online. O importante é que você se sinta confortável e seguro no ambiente em que está. O espaço virtual pode ser tão terapêutico quanto o presencial — o que importa é a qualidade da relação terapêutica.',
+  'Qual valor / política de cancelamento?',
+  'Os valores são explicados no primeiro contato. Sobre cancelamento, peço aviso prévio de 24h para remarcação sem cobrança, salvo imprevistos importantes.',
   2
 ),
 (
   v_page_id,
-  'Como é garantida a confidencialidade?',
-  'O sigilo profissional é um princípio ético fundamental da psicologia, respaldado pelo Código de Ética Profissional do CFP. Tudo o que é partilhado nas sessões permanece entre nós. Há apenas situações muito específicas (risco iminente de vida) em que o sigilo pode ser relativizado, e mesmo assim você seria comunicado.',
+  'Atende online ou presencial?',
+  'Atendo nas duas modalidades. No online, você pode estar em um lugar reservado e seguro; no presencial, combinamos conforme disponibilidade local.',
   3
 ),
 (
   v_page_id,
-  'Por quanto tempo dura o processo terapêutico?',
-  'Não há um prazo definido — cada processo é único. Algumas pessoas alcançam seus objetivos em poucos meses, outras continuam por anos e encontram valor contínuo no autoconhecimento. Conversamos regularmente sobre o andamento e você sempre tem autonomia para decidir o ritmo.',
+  'Terapia é semanal mesmo?',
+  'Na maioria dos casos, sim: o ritmo semanal ajuda a criar continuidade e resultado. Quando necessário, a frequência pode ser ajustada junto com você.',
   4
 ),
 (
   v_page_id,
-  'Você atende casos de ansiedade e depressão?',
-  'Sim. Trabalho frequentemente com pessoas que enfrentam ansiedade, síndrome do pânico, depressão, burnout e questões relacionadas. É importante ressaltar que a psicoterapia atua de forma complementar ao tratamento psiquiátrico quando necessário — ambos os olhares são valiosos.',
+  'Como é garantida a confidencialidade?',
+  'Tudo o que você compartilha é protegido por sigilo profissional, conforme o Código de Ética da Psicologia. Exceções são raras e envolvem risco grave à vida.',
   5
 ),
 (
   v_page_id,
-  'Qual o valor das sessões?',
-  'Os honorários são informados no primeiro contato, pois podem variar conforme a modalidade (online/presencial) e possibilidades. Sigo as diretrizes do CFP e acredito que o acesso ao cuidado psicológico deve ser o mais inclusivo possível. Entre em contato para conversarmos.',
+  'Por quanto tempo dura o processo terapêutico?',
+  'Não existe prazo único. A duração depende dos seus objetivos e do momento de vida, e vamos revisando isso juntas ao longo do processo.',
   6
 );
+
 
 -- ============================================================
 -- SETTINGS
