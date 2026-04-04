@@ -52,6 +52,15 @@ export function ThemeApplier({ theme }: ThemeApplierProps) {
 
   // ── Interactive backgrounds ────────────────────────────────────────────────
   const bgType = theme.background_type ?? "color";
+  const darkHeaderBackgrounds = new Set(["aurora", "neon", "nebula", "image"]);
+  const isDarkHeaderBackground = darkHeaderBackgrounds.has(bgType);
+
+  const headerTitleColor =
+    theme.title_font_color ??
+    theme.page_text_color ??
+    (isDarkHeaderBackground ? "#F9FAFB" : "#111827");
+  const headerSubtitleColor = isDarkHeaderBackground ? "#E5E7EB" : "#374151";
+  const headerMetaColor = isDarkHeaderBackground ? "#D1D5DB" : "#4B5563";
 
   const interactiveBgCss =
     bgType === "gradient"
@@ -207,6 +216,11 @@ export function ThemeApplier({ theme }: ThemeApplierProps) {
       --btn-text: ${btnText};
       --btn-radius: ${btnRadius};
       --btn-shadow: ${btnShadow};
+
+      /* Header text tokens (title/subtitle/meta) */
+      --header-title-color: ${headerTitleColor};
+      --header-subtitle-color: ${headerSubtitleColor};
+      --header-meta-color: ${headerMetaColor};
     }
 
     /* Apply page font everywhere */
@@ -216,13 +230,15 @@ export function ThemeApplier({ theme }: ThemeApplierProps) {
     ${theme.page_text_color ? `body { color: ${theme.page_text_color}; }` : ""}
 
     /* Title color override */
-    ${theme.title_font_color ? `.public-title { color: ${theme.title_font_color} !important; }` : ""}
+    .public-title { color: var(--header-title-color, #111827) !important; }
 
     /* Interactive / wallpaper background */
     ${interactiveBgCss}
 
     ${
-      theme.wallpaper_effect && theme.wallpaper_effect !== "none" && bgType === "image"
+      theme.wallpaper_effect &&
+      theme.wallpaper_effect !== "none" &&
+      bgType === "image"
         ? `.public-bg-img::before { content: ''; position: absolute; inset: 0; backdrop-filter: ${pageFilter}; pointer-events: none; }`
         : ""
     }
