@@ -6,6 +6,7 @@ import {
   Download,
   FileText,
   Globe,
+  HelpCircle,
   Instagram,
   MessageCircle,
 } from "lucide-react";
@@ -30,14 +31,18 @@ interface LinktreeLinkCardProps {
 }
 
 const ICON_CONFIG: Record<
-  string,
+  Link["type"] | "default",
   { Icon: React.ElementType; bg: string; color: string }
 > = {
   whatsapp: { Icon: MessageCircle, bg: "bg-green-100", color: "text-green-600" },
   form: { Icon: ClipboardList, bg: "bg-violet-100", color: "text-violet-600" },
   url: { Icon: Globe, bg: "bg-sky-100", color: "text-sky-600" },
   instagram: { Icon: Instagram, bg: "bg-pink-100", color: "text-pink-600" },
+  scroll: { Icon: HelpCircle, bg: "bg-indigo-200/80", color: "text-indigo-700" },
   download: { Icon: FileText, bg: "bg-amber-100", color: "text-amber-600" },
+  modal: { Icon: Download, bg: "bg-stone-100", color: "text-stone-600" },
+  internal: { Icon: Download, bg: "bg-stone-100", color: "text-stone-600" },
+  divider: { Icon: Download, bg: "bg-stone-100", color: "text-stone-600" },
   default: { Icon: Download, bg: "bg-stone-100", color: "text-stone-600" },
 };
 
@@ -51,6 +56,7 @@ type CardStyles = {
 
 function getCardStyles(
   variant: string,
+  linkType: Link["type"],
   isWhatsApp: boolean,
   iconConfig: { bg: string; color: string },
 ): CardStyles {
@@ -63,6 +69,16 @@ function getCardStyles(
       iconColor: "text-white",
     };
   }
+  if (linkType === "scroll") {
+    return {
+      card: "bg-gradient-to-r from-indigo-500 to-violet-500 shadow-md",
+      text: "text-white",
+      subtext: "text-indigo-100",
+      iconBg: "bg-indigo-950/30",
+      iconColor: "text-white",
+    };
+  }
+
   switch (variant) {
     case "primary":
       return {
@@ -132,7 +148,7 @@ export function LinktreeLinkCard({
 
   const isWhatsApp = link.type === "whatsapp";
   const iconConfig = ICON_CONFIG[link.type] ?? ICON_CONFIG.default;
-  const styles = getCardStyles(link.variant, isWhatsApp, iconConfig);
+  const styles = getCardStyles(link.variant, link.type, isWhatsApp, iconConfig);
 
   function buildHref(): string {
     if (link.type === "whatsapp") {
