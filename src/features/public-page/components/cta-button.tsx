@@ -14,7 +14,6 @@ import {
   MessageCircle,
   Sparkles,
 } from "lucide-react";
-import { cn } from "@/lib/helpers";
 import {
   trackCTAClick,
   trackExternalLink,
@@ -23,6 +22,7 @@ import {
   trackInstagramClick,
   trackWhatsAppClick,
 } from "@/lib/analytics/events";
+import { cn } from "@/lib/helpers";
 import { buildWhatsAppUrl, extractDomain } from "@/lib/helpers";
 
 import { useFormModal } from "../hooks/use-form-modal";
@@ -129,6 +129,25 @@ export function CTAButton({
     }
   }
 
+  function handleScrollToTarget() {
+    if (!url) return;
+
+    const normalizedHash = url.startsWith("#")
+      ? url
+      : url.includes("#")
+        ? `#${url.split("#")[1]}`
+        : `#${url}`;
+
+    const hashId = normalizedHash.replace(/^#/, "");
+    const target = document.getElementById(hashId);
+
+    if (!target) return;
+
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    target.classList.add("scroll-target-highlight");
+    window.setTimeout(() => target.classList.remove("scroll-target-highlight"), 1200);
+  }
+
   // Form — abre modal
   if (type === "form") {
     return (
@@ -162,8 +181,7 @@ export function CTAButton({
       <button
         onClick={() => {
           handleClick();
-          const target = url ? document.querySelector(url) : null;
-          target?.scrollIntoView({ behavior: "smooth" });
+          handleScrollToTarget();
         }}
         className={cn(variantStyle, className)}
         style={{ animationDelay: `${animationDelay}ms` }}

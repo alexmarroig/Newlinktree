@@ -51,7 +51,7 @@ export function HeroBlock({ block, profile }: HeroBlockProps) {
 
         {/* Nome e título */}
         <div className="space-y-1.5">
-          <h1 className="font-heading text-2xl font-semibold text-foreground">
+          <h1 className="font-heading text-2xl font-semibold text-foreground hero-name-glow">
             {profile.name}
           </h1>
           <p className="text-sm font-medium text-primary">
