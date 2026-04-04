@@ -166,7 +166,7 @@ export function CTAButton({
           <div className="text-left">
             <p className="text-sm font-semibold leading-tight">{label}</p>
             {sublabel && (
-              <p className="mt-0.5 text-xs opacity-70">{sublabel}</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-current/80">{sublabel}</p>
             )}
           </div>
         </div>
@@ -193,7 +193,7 @@ export function CTAButton({
           <div className="text-left">
             <p className="text-sm font-semibold leading-tight">{label}</p>
             {sublabel && (
-              <p className="mt-0.5 text-xs opacity-70">{sublabel}</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-current/80">{sublabel}</p>
             )}
           </div>
         </div>
@@ -225,7 +225,7 @@ export function CTAButton({
           <div className="text-left">
             <p className="text-sm font-semibold leading-tight">{label}</p>
             {sublabel && (
-              <p className="mt-0.5 text-xs opacity-70">{sublabel}</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-current/80">{sublabel}</p>
             )}
           </div>
         </div>
@@ -254,7 +254,7 @@ export function CTAButton({
         <div className="text-left">
           <p className="text-sm font-semibold leading-tight">{label}</p>
           {sublabel && (
-            <p className="mt-0.5 text-xs opacity-70">{sublabel}</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-current/80">{sublabel}</p>
           )}
         </div>
       </div>
