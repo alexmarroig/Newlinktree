@@ -2,13 +2,17 @@
 
 import Image from "next/image";
 import {
+  BookHeart,
+  Brain,
   ClipboardList,
   Download,
   FileText,
   Globe,
+  HandHeart,
   HelpCircle,
   Instagram,
   MessageCircle,
+  Sparkles,
 } from "lucide-react";
 
 import { buildWhatsAppUrl } from "@/lib/helpers";
@@ -34,16 +38,16 @@ const ICON_CONFIG: Record<
   Link["type"] | "default",
   { Icon: React.ElementType; bg: string; color: string }
 > = {
-  whatsapp: { Icon: MessageCircle, bg: "bg-green-100", color: "text-green-600" },
-  form: { Icon: ClipboardList, bg: "bg-violet-100", color: "text-violet-600" },
-  url: { Icon: Globe, bg: "bg-sky-100", color: "text-sky-600" },
-  instagram: { Icon: Instagram, bg: "bg-pink-100", color: "text-pink-600" },
+  whatsapp: { Icon: HandHeart, bg: "bg-emerald-100", color: "text-emerald-600" },
+  form: { Icon: Sparkles, bg: "bg-violet-100", color: "text-violet-600" },
+  url: { Icon: Brain, bg: "bg-teal-100", color: "text-teal-600" },
+  instagram: { Icon: BookHeart, bg: "bg-rose-100", color: "text-rose-500" },
   scroll: { Icon: HelpCircle, bg: "bg-indigo-200/80", color: "text-indigo-700" },
   download: { Icon: FileText, bg: "bg-amber-100", color: "text-amber-600" },
-  modal: { Icon: Download, bg: "bg-stone-100", color: "text-stone-600" },
-  internal: { Icon: Download, bg: "bg-stone-100", color: "text-stone-600" },
+  modal: { Icon: ClipboardList, bg: "bg-stone-100", color: "text-stone-600" },
+  internal: { Icon: Globe, bg: "bg-sky-100", color: "text-sky-600" },
   divider: { Icon: Download, bg: "bg-stone-100", color: "text-stone-600" },
-  default: { Icon: Download, bg: "bg-stone-100", color: "text-stone-600" },
+  default: { Icon: Sparkles, bg: "bg-primary/10", color: "text-primary" },
 };
 
 type CardStyles = {

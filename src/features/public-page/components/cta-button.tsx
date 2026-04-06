@@ -2,12 +2,15 @@
 
 import {
   ArrowRight,
+  BookHeart,
   BookOpen,
+  Brain,
   ChevronDown,
   ClipboardList,
   Download,
   ExternalLink,
   Globe,
+  HandHeart,
   Heart,
   HelpCircle,
   Instagram,
@@ -40,6 +43,9 @@ const ICON_MAP: Record<string, React.ElementType> = {
   ExternalLink,
   ChevronDown,
   ArrowRight,
+  HandHeart,
+  BookHeart,
+  Brain,
 };
 
 type CTAVariant = "primary" | "secondary" | "ghost" | "outline" | "soft";
@@ -269,12 +275,12 @@ export function CTAButton({
 
 function getDefaultIcon(type: string): React.ElementType {
   const map: Record<string, React.ElementType> = {
-    whatsapp: MessageCircle,
-    form: ClipboardList,
-    url: Globe,
-    instagram: Instagram,
+    whatsapp: HandHeart,
+    form: Sparkles,
+    url: Brain,
+    instagram: BookHeart,
     download: Download,
-    scroll: ChevronDown,
+    scroll: HelpCircle,
   };
-  return map[type] ?? ArrowRight;
+  return map[type] ?? Sparkles;
 }

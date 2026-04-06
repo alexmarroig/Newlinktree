@@ -1,11 +1,12 @@
 "use client";
 
 import {
-  BookOpen,
+  BookHeart,
+  Brain,
   Compass,
-  Download,
+  HandHeart,
   HelpCircle,
-  MessageCircle,
+  Sparkles,
 } from "lucide-react";
 
 import type { Block, Link, Profile, Settings } from "@/types";
@@ -14,11 +15,12 @@ import type { StartHereContent } from "@/types";
 import { useFormModal } from "../../hooks/use-form-modal";
 
 const ICON_MAP: Record<string, React.ElementType> = {
-  MessageCircle,
+  HandHeart,
   HelpCircle,
-  BookOpen,
-  Download,
+  BookHeart,
+  Brain,
   Compass,
+  Sparkles,
 };
 
 interface StartHereBlockProps {
