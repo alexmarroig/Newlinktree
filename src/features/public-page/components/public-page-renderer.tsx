@@ -168,7 +168,7 @@ export function PublicPageRenderer({ data }: PublicPageRendererProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="WhatsApp"
-                  className="text-gray-500 transition-colors hover:text-gray-900"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#25D366] text-white shadow-sm transition-transform hover:scale-105 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F5F5F5]"
                 >
                   <svg
                     viewBox="0 0 24 24"
@@ -187,7 +187,7 @@ export function PublicPageRenderer({ data }: PublicPageRendererProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="LinkedIn"
-                  className="text-gray-500 transition-colors hover:text-gray-900"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#0A66C2] text-white shadow-sm transition-transform hover:scale-105 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F5F5F5]"
                 >
                   <svg
                     viewBox="0 0 24 24"
@@ -204,7 +204,7 @@ export function PublicPageRenderer({ data }: PublicPageRendererProps) {
                 <a
                   href={`mailto:${settings.contact_email}`}
                   aria-label="E-mail"
-                  className="text-gray-500 transition-colors hover:text-gray-900"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-sm transition-transform hover:scale-105 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F5F5F5]"
                 >
                   <svg
                     viewBox="0 0 24 24"
@@ -228,7 +228,7 @@ export function PublicPageRenderer({ data }: PublicPageRendererProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="YouTube"
-                  className="text-gray-500 transition-colors hover:text-gray-900"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#FF0000] text-white shadow-sm transition-transform hover:scale-105 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F5F5F5]"
                 >
                   <svg
                     viewBox="0 0 24 24"

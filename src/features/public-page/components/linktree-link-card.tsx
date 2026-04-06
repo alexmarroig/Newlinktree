@@ -318,6 +318,22 @@ export function LinktreeLinkCard({
     );
   }
 
+  // ── Scroll type — internal anchor (no target blank) ───────────────────────────
+  if (link.type === "scroll") {
+    return (
+      <a
+        href={link.url ?? "#"}
+        onClick={track}
+        className={cardClass}
+        style={cardStyle}
+      >
+        <LeftThumb />
+        {label}
+        {rightSpacer}
+      </a>
+    );
+  }
+
   // ── All other types — anchor ────────────────────────────────────────────────
   return (
     <a
