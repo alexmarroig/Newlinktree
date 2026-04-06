@@ -18,11 +18,11 @@ interface SplashScreenProps {
 // ─── Frases por horário ───────────────────────────────────────────────────────
 
 const PHRASES: { start: number; end: number; text: string }[] = [
-  { start: 5,  end: 12, text: "Você acordou. Isso já é um começo." },
-  { start: 12, end: 17, text: "Nem tudo que te cansa é visível." },
-  { start: 17, end: 21, text: "Você aprendeu a dar conta… mas não a sentir." },
-  { start: 21, end: 24, text: "Tem coisas que só aparecem quando você desacelera." },
-  { start: 0,  end: 5,  text: "Você não precisa estar em crise para se cuidar." },
+  { start: 5,  end: 12, text: "Hoje é um bom dia para começar a se ouvir." },
+  { start: 12, end: 17, text: "E se você pudesse transformar o que sente em força?" },
+  { start: 17, end: 21, text: "Seus sentimentos merecem um espaço seguro." },
+  { start: 21, end: 24, text: "A mudança começa quando você decide cuidar de si." },
+  { start: 0,  end: 5,  text: "Até aqui você veio sozinho. Agora pode ter apoio." },
 ];
 
 function getAutoPhrase(): string {

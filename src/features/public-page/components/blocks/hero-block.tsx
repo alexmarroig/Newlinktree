@@ -54,11 +54,11 @@ export function HeroBlock({ block, profile }: HeroBlockProps) {
           <h1 className="font-heading text-2xl font-semibold text-foreground hero-name-glow">
             {profile.name}
           </h1>
-          <p className="text-sm font-medium text-primary">
+          <p className="hero-title-glow text-sm font-semibold tracking-wide">
             {profile.professional_title}
           </p>
           {profile.crp && (
-            <p className="text-xs text-muted-foreground">{profile.crp}</p>
+            <p className="hero-crp-badge text-xs font-medium">{profile.crp}</p>
           )}
         </div>
 

@@ -41,7 +41,7 @@ BEGIN
 -- ============================================================
 INSERT INTO public.profiles (
   id, user_id, name, professional_title, crp,
-  bio, subtitle, whatsapp_number, instagram_url, website_url
+  bio, subtitle, whatsapp_number, instagram_url, website_url, avatar_url
 ) VALUES (
   v_profile_id,
   v_user_id,
@@ -52,7 +52,8 @@ INSERT INTO public.profiles (
   'Atendimentos online e presenciais · São Paulo, SP',
   '5511999999999',
   'https://instagram.com/anaclarasilva.psi',
-  'https://anaclarasilva.com.br'
+  'https://anaclarasilva.com.br',
+  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&crop=face'
 );
 
 -- ============================================================
