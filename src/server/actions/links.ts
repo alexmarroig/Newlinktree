@@ -134,6 +134,13 @@ export async function deleteLink(linkId: string): Promise<ApiResponse> {
 
   if (!user) return { success: false, error: "Não autorizado" };
 
+  // Busca page_id antes de deletar o link
+  const { data: link } = await supabase
+    .from("links")
+    .select("page_id")
+    .eq("id", linkId)
+    .single();
+
   const { error } = await supabase
     .from("links")
     .delete()
@@ -141,6 +148,15 @@ export async function deleteLink(linkId: string): Promise<ApiResponse> {
 
   if (error) return { success: false, error: "Erro ao deletar link" };
 
+  // Invalida cache da página pública
+  if (link) {
+    const { data: page } = await supabase
+      .from("pages")
+      .select("slug")
+      .eq("id", link.page_id)
+      .single();
+    if (page) revalidateTag(`${PAGE_CACHE_TAG_PREFIX}${page.slug}`);
+  }
   revalidatePath("/admin/links");
   return { success: true, data: undefined };
 }
@@ -191,6 +207,14 @@ export async function updateLink(
     return { success: false, error: "Erro ao atualizar link" };
   }
 
+  // Invalida cache da página pública
+  const { data: page } = await supabase
+    .from("pages")
+    .select("slug")
+    .eq("id", (updatedLink as Link).page_id)
+    .single();
+
+  if (page) revalidateTag(`${PAGE_CACHE_TAG_PREFIX}${page.slug}`);
   revalidatePath("/admin/links");
   return { success: true, data: updatedLink as Link };
 }
@@ -213,6 +237,21 @@ export async function setLinkThumbnail(
 
   if (error) return { success: false, error: "Erro ao atualizar thumbnail" };
 
+  // Invalida cache da página pública
+  const { data: link } = await supabase
+    .from("links")
+    .select("page_id")
+    .eq("id", linkId)
+    .single();
+
+  if (link) {
+    const { data: page } = await supabase
+      .from("pages")
+      .select("slug")
+      .eq("id", link.page_id)
+      .single();
+    if (page) revalidateTag(`${PAGE_CACHE_TAG_PREFIX}${page.slug}`);
+  }
   revalidatePath("/admin/links");
   return { success: true, data: undefined };
 }
