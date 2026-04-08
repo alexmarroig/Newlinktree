@@ -277,7 +277,7 @@ INSERT INTO public.links (
 (
   v_link_tcc_id, v_page_id, v_block_ctas_id,
   'Baixar meu TCC',
-  'Ansiedade na Contemporaneidade — acesso gratuito',
+  'Estudo sobre USO EXCESSIVO DE REDES SOCIAIS',
   'download', 'Download',
   null, null,
   'outline', 4
