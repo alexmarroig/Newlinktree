@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -9,25 +9,25 @@ interface SplashScreenProps {
   avatarUrl?: string | null;
   name: string;
   title?: string | null;
-  /** Override da frase. Se omitido, seleciona automaticamente pelo horário. */
+  /** Override da frase. Se omitido, seleciona aleatoriamente na inicialização. */
   phrase?: string;
   /** Intervalo em dias entre exibições. Default: 7. */
   intervalDays?: number;
 }
 
-// ─── Frases por horário ───────────────────────────────────────────────────────
+// ─── Frases ───────────────────────────────────────────────────────────────────
 
-const PHRASES: { start: number; end: number; text: string }[] = [
-  { start: 5,  end: 12, text: "Hoje é um bom dia para começar a se ouvir." },
-  { start: 12, end: 17, text: "E se você pudesse transformar o que sente em força?" },
-  { start: 17, end: 21, text: "Seus sentimentos merecem um espaço seguro." },
-  { start: 21, end: 24, text: "A mudança começa quando você decide cuidar de si." },
-  { start: 0,  end: 5,  text: "Até aqui você veio sozinho. Agora pode ter apoio." },
-];
+const QUOTES = [
+  "Até você tornar o inconsciente consciente, ele dirigirá sua vida e você o chamará de destino.",
+  "Pensamentos não expressos nunca morrem. Eles são enterrados vivos.",
+  "O curioso paradoxo é que, quando me aceito como sou, então posso mudar.",
+  "Entre o estímulo e a resposta existe um espaço. Nesse espaço está o nosso poder de escolher.",
+  "É no brincar, e talvez apenas no brincar, que o indivíduo descobre o self.",
+] as const;
 
-function getAutoPhrase(): string {
-  const h = new Date().getHours();
-  return PHRASES.find((p) => h >= p.start && h < p.end)?.text ?? PHRASES[1]!.text;
+function getRandomQuote(): string {
+  const randomIndex = Math.floor(Math.random() * QUOTES.length);
+  return QUOTES[randomIndex] ?? QUOTES[0];
 }
 
 // ─── localStorage ─────────────────────────────────────────────────────────────
@@ -47,7 +47,9 @@ function shouldShow(intervalDays: number): boolean {
 function markShown(): void {
   try {
     localStorage.setItem(STORAGE_KEY, String(Date.now()));
-  } catch { /* noop */ }
+  } catch {
+    /* noop */
+  }
 }
 
 // ─── Stage machine ────────────────────────────────────────────────────────────
@@ -70,7 +72,7 @@ export function SplashScreen({
   intervalDays = 7,
 }: SplashScreenProps) {
   const [stage, setStage] = useState<Stage>(null);
-  const [resolvedPhrase, setResolvedPhrase] = useState("");
+  const selectedQuoteRef = useRef<string>(phrase ?? getRandomQuote());
 
   useEffect(() => {
     if (!shouldShow(intervalDays)) {
@@ -79,7 +81,6 @@ export function SplashScreen({
     }
 
     markShown();
-    setResolvedPhrase(phrase ?? getAutoPhrase());
     setStage(0);
 
     const t1 = setTimeout(() => setStage(1), 1500);
@@ -93,14 +94,17 @@ export function SplashScreen({
       clearTimeout(t3);
       clearTimeout(t4);
     };
-  }, [intervalDays, phrase]);
+  }, [intervalDays]);
+
+  // Mantém compatibilidade com override dinâmico de frase sem re-sortear.
+  const resolvedPhrase = phrase ?? selectedQuoteRef.current;
 
   // SSR → null (sem hydration mismatch). Visita repetida → null.
   if (stage === null || stage === "out") return null;
 
-  const showPhrase   = stage >= 1;
+  const showPhrase = stage >= 1;
   const showIdentity = stage >= 2;
-  const isExiting    = stage === 3;
+  const isExiting = stage === 3;
 
   return (
     <div
@@ -119,9 +123,7 @@ export function SplashScreen({
 
       {/* Conteúdo central */}
       <div className="splash-content">
-        {showPhrase && (
-          <p className="splash-phrase">{resolvedPhrase}</p>
-        )}
+        {showPhrase && <p className="splash-phrase">{resolvedPhrase}</p>}
 
         {showIdentity && (
           <div className="splash-identity">
