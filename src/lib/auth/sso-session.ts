@@ -10,7 +10,16 @@ export type SsoSessionContext = {
 export const SSO_COOKIE_NAME = "biohub_sso_ctx";
 
 export function serializeSsoSession(session: SsoSessionContext) {
-  return Buffer.from(JSON.stringify(session)).toString("base64url");
+  const persistedSession = {
+    user_id: session.user_id,
+    tenant_id: session.tenant_id,
+    session_id: session.session_id,
+    issued_at: session.issued_at,
+    exp: session.exp,
+    requires_upgrade: session.requires_upgrade,
+  } satisfies SsoSessionContext;
+
+  return Buffer.from(JSON.stringify(persistedSession)).toString("base64url");
 }
 
 export function parseSsoSession(serialized?: string | null) {
