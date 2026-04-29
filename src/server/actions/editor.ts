@@ -11,6 +11,24 @@ import {
 import { PAGE_CACHE_TAG_PREFIX } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import type { ApiResponse, Block } from "@/types";
+import { biohubAccessService } from "@/domain/access/BiohubAccessService";
+import type { BiohubPlan, BiohubAccessStatus } from "@/types";
+
+function resolveUserPlan(rawPlan?: unknown): BiohubPlan {
+  if (rawPlan === "free" || rawPlan === "pro" || rawPlan === "enterprise") {
+    return rawPlan;
+  }
+
+  return "pro";
+}
+
+function resolveUserStatus(rawStatus?: unknown): BiohubAccessStatus {
+  if (rawStatus === "granted" || rawStatus === "denied") {
+    return rawStatus;
+  }
+
+  return "granted";
+}
 import {
   logAccessDecision,
   logDegradedFallback,
@@ -58,6 +76,18 @@ export async function saveEditorDraft(
     return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
   }
 
+  const access = biohubAccessService.resolveAccess(
+    {
+      id: user.id,
+      plan: resolveUserPlan(user.user_metadata?.biohub_plan),
+      status: resolveUserStatus(user.user_metadata?.biohub_status),
+    },
+    "edit",
+  );
+
+  if (!access.can_edit) {
+    return { success: false, error: "Acesso bloqueado para edição", code: access.reason_code };
+  }
   await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
 
   // Verifica que o usuário autenticado é dono da página
@@ -190,6 +220,22 @@ export async function publishPage(
     return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
   }
 
+  const access = biohubAccessService.resolveAccess(
+    {
+      id: user.id,
+      plan: resolveUserPlan(user.user_metadata?.biohub_plan),
+      status: resolveUserStatus(user.user_metadata?.biohub_status),
+    },
+    "publish",
+  );
+
+  if (!access.can_publish) {
+    return {
+      success: false,
+      error: "Acesso bloqueado para publicação",
+      code: access.reason_code,
+    };
+  }
   const accessCheckStart = Date.now();
   logEthosQueryStarted({
     correlation_id: correlationId,
