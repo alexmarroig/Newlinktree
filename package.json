@@ -13,7 +13,10 @@
     "type-check": "tsc --noEmit",
     "db:generate": "supabase db diff --use-migra",
     "db:push": "supabase db push",
-    "db:reset": "supabase db reset"
+    "db:reset": "supabase db reset",
+    "test": "node --test --experimental-strip-types test/unit/*.test.ts test/integration/*.test.ts",
+    "test:unit": "node --test --experimental-strip-types test/unit/*.test.ts",
+    "test:integration": "node --test --experimental-strip-types test/integration/*.test.ts"
   },
   "dependencies": {
     "next": "^15.1.0",
