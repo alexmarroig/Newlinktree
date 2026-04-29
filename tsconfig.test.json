@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": ".test-dist",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "declaration": false,
+    "sourceMap": false,
+    "incremental": false,
+    "isolatedModules": false,
+    "verbatimModuleSyntax": false,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/types": ["./src/types/index.ts"]
+    }
+  },
+  "include": [
+    "src/server/access/**/*.ts",
+    "src/types/index.ts",
+    "test/**/*.ts"
+  ]
+}

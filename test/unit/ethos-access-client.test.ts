@@ -36,3 +36,19 @@ test('cache TTL evitando chamadas excessivas', async () => {
   await c.getAccess('p2');
   assert.equal(calls, 1);
 });
+
+test('cache TTL expira e permite nova chamada', async () => {
+  let calls = 0;
+  // @ts-ignore
+  global.fetch = async () => {
+    calls++;
+    return { status: 200, ok: true, json: async () => ({ tier: 'ambassador' }) };
+  };
+
+  const c = new EthosAccessClient({ baseUrl: 'http://x', ttlMs: 1 });
+  await c.getAccess('p3');
+  await new Promise((resolve) => setTimeout(resolve, 5));
+  await c.getAccess('p3');
+
+  assert.equal(calls, 2);
+});
