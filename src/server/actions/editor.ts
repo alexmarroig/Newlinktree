@@ -2,8 +2,12 @@
 
 import { revalidateTag } from "next/cache";
 
-import { createClient } from "@/lib/supabase/server";
+import {
+  RequireBiohubEditAccess,
+  RequireBiohubPublishAccess,
+} from "@/http/middleware/biohub-access";
 import { PAGE_CACHE_TAG_PREFIX } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/server";
 import type { ApiResponse, Block } from "@/types";
 import {
   logAccessDecision,
@@ -28,6 +32,14 @@ export async function saveEditorDraft(
 
 
   const supabase = await createClient();
+  const access = await RequireBiohubEditAccess(supabase, pageId);
+
+  if (!access.ok) {
+    return {
+      success: false,
+      error: access.error ?? "Não autorizado",
+      code: access.code,
+    };
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -146,6 +158,16 @@ export async function publishPage(
   permissions: AccessPermissions = { canEdit: true, canPublish: true, readOnly: false, reason: "legacy_default" },
 ): Promise<ApiResponse> {
   const supabase = await createClient();
+  const access = await RequireBiohubPublishAccess(supabase, pageId);
+
+  if (!access.ok) {
+    return {
+      success: false,
+      error: access.error ?? "Não autorizado",
+      code: access.code,
+    };
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
