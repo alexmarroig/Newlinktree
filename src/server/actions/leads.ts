@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
-import { BiohubAccessService } from "@/server/services/biohub-access-service";
+import { requireAdminWriteAccess } from "@/http/middleware/admin-write-access";
 import { leadStatusSchema } from "@/lib/validations";
 import type { ApiResponse, LeadStatus } from "@/types";
 
@@ -17,15 +17,10 @@ export async function updateLeadStatus(
   }
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
+  const access = await requireAdminWriteAccess(supabase);
+  if (!access.ok) {
+    return { success: false, error: access.error ?? "Não autorizado", code: access.code };
   }
-
-  await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
 
   const { error } = await supabase
     .from("form_submissions")
@@ -44,12 +39,9 @@ export async function deleteLeadSubmission(
   submissionId: string,
 ): Promise<ApiResponse> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
+  const access = await requireAdminWriteAccess(supabase);
+  if (!access.ok) {
+    return { success: false, error: access.error ?? "Não autorizado", code: access.code };
   }
 
   const { error } = await supabase
@@ -70,12 +62,9 @@ export async function addLeadNote(
   note: string,
 ): Promise<ApiResponse<{ id: string }>> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
+  const access = await requireAdminWriteAccess(supabase);
+  if (!access.ok) {
+    return { success: false, error: access.error ?? "Não autorizado", code: access.code };
   }
 
   const { data, error } = await supabase
@@ -83,7 +72,7 @@ export async function addLeadNote(
     .insert({
       submission_id: submissionId,
       note,
-      created_by: user.id,
+      created_by: access.userId,
     })
     .select("id")
     .single();
