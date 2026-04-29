@@ -2,55 +2,15 @@
 
 import { revalidateTag } from "next/cache";
 
-import { createClient } from "@/lib/supabase/server";
-import { BiohubAccessService } from "@/server/services/biohub-access-service";
-import {
-  RequireBiohubEditAccess,
-  RequireBiohubPublishAccess,
-} from "@/http/middleware/biohub-access";
+import { RequireBiohubEditAccess, RequireBiohubPublishAccess } from "@/http/middleware/biohub-access";
 import { PAGE_CACHE_TAG_PREFIX } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import type { ApiResponse, Block } from "@/types";
-import { biohubAccessService } from "@/domain/access/BiohubAccessService";
-import type { BiohubPlan, BiohubAccessStatus } from "@/types";
-
-function resolveUserPlan(rawPlan?: unknown): BiohubPlan {
-  if (rawPlan === "free" || rawPlan === "pro" || rawPlan === "enterprise") {
-    return rawPlan;
-  }
-
-  return "pro";
-}
-
-function resolveUserStatus(rawStatus?: unknown): BiohubAccessStatus {
-  if (rawStatus === "granted" || rawStatus === "denied") {
-    return rawStatus;
-  }
-
-  return "granted";
-}
-import {
-  logAccessDecision,
-  logDegradedFallback,
-  logEthosQueryFinished,
-  logEthosQueryStarted,
-} from "@/lib/helpers/access-logger";
-import { enforceEditPermission, enforcePublishPermission } from "@/server/access/authoring-guard";
-import type { AccessPermissions } from "@/server/access/types";
 
 /**
  * Salva o rascunho do editor — persiste blocos no banco.
  */
-export async function saveEditorDraft(
-  pageId: string,
-  blocks: Block[],
-  permissions: AccessPermissions = { canEdit: true, canPublish: true, readOnly: false, reason: "legacy_default" },
-): Promise<ApiResponse> {
-  const correlationId = crypto.randomUUID();
-  const editBlock = enforceEditPermission(permissions);
-  if (editBlock) return editBlock;
-
-
+export async function saveEditorDraft(pageId: string, blocks: Block[]): Promise<ApiResponse> {
   const supabase = await createClient();
   const access = await RequireBiohubEditAccess(supabase, pageId);
 
@@ -60,110 +20,8 @@ export async function saveEditorDraft(
       error: access.error ?? "Não autorizado",
       code: access.code,
     };
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    logAccessDecision({
-      correlation_id: correlationId,
-      user_id: null,
-      action: "edit",
-      status: "denied",
-      source: "local_policy",
-      reason_code: "AUTH_REQUIRED",
-    });
-    return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
   }
 
-  const access = biohubAccessService.resolveAccess(
-    {
-      id: user.id,
-      plan: resolveUserPlan(user.user_metadata?.biohub_plan),
-      status: resolveUserStatus(user.user_metadata?.biohub_status),
-    },
-    "edit",
-  );
-
-  if (!access.can_edit) {
-    return { success: false, error: "Acesso bloqueado para edição", code: access.reason_code };
-  }
-  await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
-
-  // Verifica que o usuário autenticado é dono da página
-  const { data: page } = await supabase
-  // Consulta serviço de acesso (ETHOS) e aplica fallback local se necessário
-  const accessCheckStart = Date.now();
-  logEthosQueryStarted({
-    correlation_id: correlationId,
-    user_id: user.id,
-    reason_code: "OWNER_CHECK_REQUESTED",
-  });
-
-  const { data: page, error: accessQueryError } = await supabase
-    .from("pages")
-    .select("id, slug, profiles!inner(user_id)")
-    .eq("id", pageId)
-    .single();
-
-  const accessLatencyMs = Date.now() - accessCheckStart;
-
-  if (accessQueryError) {
-    logDegradedFallback({
-      correlation_id: correlationId,
-      user_id: user.id,
-      source: "local_policy",
-      reason_code: "ETHOS_UNAVAILABLE",
-      latency_ms: accessLatencyMs,
-    });
-  } else {
-    logEthosQueryFinished({
-      correlation_id: correlationId,
-      user_id: user.id,
-      reason_code: "OWNER_CHECK_COMPLETED",
-      latency_ms: accessLatencyMs,
-    });
-  }
-
-  if (!page) {
-    logAccessDecision({
-      correlation_id: correlationId,
-      user_id: user.id,
-      action: "publish",
-      status: "denied",
-      source: "local_policy",
-      reason_code: "PAGE_NOT_FOUND",
-      latency_ms: accessLatencyMs,
-    });
-    return { success: false, error: "Página não encontrada" };
-  }
-
-  // Garante que o perfil vinculado pertence ao usuário autenticado
-  const profile = page.profiles as unknown as { user_id: string };
-  if (profile.user_id !== user.id) {
-    logAccessDecision({
-      correlation_id: correlationId,
-      user_id: user.id,
-      action: "edit",
-      status: "denied",
-      source: "local_policy",
-      reason_code: "OWNER_MISMATCH",
-      latency_ms: accessLatencyMs,
-    });
-    return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
-  }
-
-  logAccessDecision({
-    correlation_id: correlationId,
-    user_id: user.id,
-    action: "edit",
-    status: "allowed",
-    source: "local_policy",
-    reason_code: "OWNER_MATCH",
-    latency_ms: accessLatencyMs,
-  });
-
-  // Atualiza cada bloco com position e content_json
   const updates = blocks.map((block) =>
     supabase
       .from("blocks")
@@ -188,11 +46,6 @@ export async function saveEditorDraft(
  * Publica a página — cria snapshot e atualiza status.
  */
 export async function publishPage(pageId: string): Promise<ApiResponse> {
-  const correlationId = crypto.randomUUID();
-export async function publishPage(
-  pageId: string,
-  permissions: AccessPermissions = { canEdit: true, canPublish: true, readOnly: false, reason: "legacy_default" },
-): Promise<ApiResponse> {
   const supabase = await createClient();
   const access = await RequireBiohubPublishAccess(supabase, pageId);
 
@@ -209,127 +62,18 @@ export async function publishPage(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    logAccessDecision({
-      correlation_id: correlationId,
-      user_id: null,
-      action: "edit",
-      status: "denied",
-      source: "local_policy",
-      reason_code: "AUTH_REQUIRED",
-    });
     return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
   }
 
-  const access = biohubAccessService.resolveAccess(
-    {
-      id: user.id,
-      plan: resolveUserPlan(user.user_metadata?.biohub_plan),
-      status: resolveUserStatus(user.user_metadata?.biohub_status),
-    },
-    "publish",
-  );
-
-  if (!access.can_publish) {
-    return {
-      success: false,
-      error: "Acesso bloqueado para publicação",
-      code: access.reason_code,
-    };
-  }
-  const accessCheckStart = Date.now();
-  logEthosQueryStarted({
-    correlation_id: correlationId,
-    user_id: user.id,
-    reason_code: "OWNER_CHECK_REQUESTED",
-  });
-
-  // Verifica que o usuário autenticado é dono da página antes do snapshot
-  const { data: pageOwnerCheck, error: ownerCheckError } = await supabase
-    .from("pages")
-    .select("id, profiles!inner(user_id)")
-    .eq("id", pageId)
-    .single();
-
-  const accessLatencyMs = Date.now() - accessCheckStart;
-
-  if (ownerCheckError) {
-    logDegradedFallback({
-      correlation_id: correlationId,
-      user_id: user.id,
-      source: "local_policy",
-      reason_code: "ETHOS_UNAVAILABLE",
-      latency_ms: accessLatencyMs,
-    });
-  } else {
-    logEthosQueryFinished({
-      correlation_id: correlationId,
-      user_id: user.id,
-      reason_code: "OWNER_CHECK_COMPLETED",
-      latency_ms: accessLatencyMs,
-    });
-  }
-
-  if (!pageOwnerCheck) {
-    logAccessDecision({
-      correlation_id: correlationId,
-      user_id: user.id,
-      action: "publish",
-      status: "denied",
-      source: "local_policy",
-      reason_code: "PAGE_NOT_FOUND",
-      latency_ms: accessLatencyMs,
-    });
-    return { success: false, error: "Página não encontrada" };
-  }
-
-  const ownerProfile = pageOwnerCheck.profiles as unknown as { user_id: string };
-  if (ownerProfile.user_id !== user.id) {
-    logAccessDecision({
-      correlation_id: correlationId,
-      user_id: user.id,
-      action: "publish",
-      status: "denied",
-      source: "local_policy",
-      reason_code: "OWNER_MISMATCH",
-      latency_ms: accessLatencyMs,
-    });
-    return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
-  }
-
-  logAccessDecision({
-    correlation_id: correlationId,
-    user_id: user.id,
-    action: "publish",
-    status: "allowed",
-    source: "local_policy",
-    reason_code: "OWNER_MATCH",
-    latency_ms: accessLatencyMs,
-  });
-
-  // Carrega dados atuais para snapshot
-  const [{ data: page }, { data: blocks }, { data: links }, { data: faqItems }] =
-    await Promise.all([
-      supabase.from("pages").select("*").eq("id", pageId).single(),
-      supabase
-        .from("blocks")
-        .select("*")
-        .eq("page_id", pageId)
-        .order("position"),
-      supabase
-        .from("links")
-        .select("*")
-        .eq("page_id", pageId)
-        .order("position"),
-      supabase
-        .from("faq_items")
-        .select("*")
-        .eq("page_id", pageId)
-        .order("position"),
-    ]);
+  const [{ data: page }, { data: blocks }, { data: links }, { data: faqItems }] = await Promise.all([
+    supabase.from("pages").select("*").eq("id", pageId).single(),
+    supabase.from("blocks").select("*").eq("page_id", pageId).order("position"),
+    supabase.from("links").select("*").eq("page_id", pageId).order("position"),
+    supabase.from("faq_items").select("*").eq("page_id", pageId).order("position"),
+  ]);
 
   if (!page) return { success: false, error: "Página não encontrada" };
 
-  // Determina próximo número de versão
   const { data: lastVersion } = await supabase
     .from("published_versions")
     .select("version_number")
@@ -340,7 +84,6 @@ export async function publishPage(
 
   const versionNumber = (lastVersion?.version_number ?? 0) + 1;
 
-  // Cria snapshot
   await supabase.from("published_versions").insert({
     page_id: pageId,
     version_number: versionNumber,
@@ -348,7 +91,6 @@ export async function publishPage(
     published_by: user.id,
   });
 
-  // Atualiza status da página para published
   await supabase
     .from("pages")
     .update({
@@ -357,7 +99,6 @@ export async function publishPage(
     })
     .eq("id", pageId);
 
-  // Invalida cache da página pública
   revalidateTag(`${PAGE_CACHE_TAG_PREFIX}${page.slug}`);
 
   return { success: true, data: undefined };
