@@ -11,6 +11,8 @@ import {
   logEthosQueryFinished,
   logEthosQueryStarted,
 } from "@/lib/helpers/access-logger";
+import { enforceEditPermission, enforcePublishPermission } from "@/server/access/authoring-guard";
+import type { AccessPermissions } from "@/server/access/types";
 
 /**
  * Salva o rascunho do editor — persiste blocos no banco.
@@ -18,8 +20,13 @@ import {
 export async function saveEditorDraft(
   pageId: string,
   blocks: Block[],
+  permissions: AccessPermissions = { canEdit: true, canPublish: true, readOnly: false, reason: "legacy_default" },
 ): Promise<ApiResponse> {
   const correlationId = crypto.randomUUID();
+  const editBlock = enforceEditPermission(permissions);
+  if (editBlock) return editBlock;
+
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -134,6 +141,10 @@ export async function saveEditorDraft(
  */
 export async function publishPage(pageId: string): Promise<ApiResponse> {
   const correlationId = crypto.randomUUID();
+export async function publishPage(
+  pageId: string,
+  permissions: AccessPermissions = { canEdit: true, canPublish: true, readOnly: false, reason: "legacy_default" },
+): Promise<ApiResponse> {
   const supabase = await createClient();
   const {
     data: { user },
