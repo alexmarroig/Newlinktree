@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { revalidateTag } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { BiohubAccessService } from "@/server/services/biohub-access-service";
 import { PAGE_CACHE_TAG_PREFIX } from "@/lib/constants";
 import { linkSchema } from "@/lib/validations";
 import type { ApiResponse, Link } from "@/types";
@@ -18,6 +19,8 @@ export async function createLink(
   } = await supabase.auth.getUser();
 
   if (!user) return { success: false, error: "Não autorizado" };
+
+  await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
 
   // Verifica propriedade da página
   const { data: page } = await supabase
@@ -98,6 +101,8 @@ export async function toggleLink(linkId: string): Promise<ApiResponse> {
 
   if (!user) return { success: false, error: "Não autorizado" };
 
+  await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
+
   const { data: link } = await supabase
     .from("links")
     .select("is_enabled, page_id")
@@ -133,6 +138,8 @@ export async function deleteLink(linkId: string): Promise<ApiResponse> {
   } = await supabase.auth.getUser();
 
   if (!user) return { success: false, error: "Não autorizado" };
+
+  await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
 
   // Busca page_id antes de deletar o link
   const { data: link } = await supabase
@@ -171,6 +178,8 @@ export async function updateLink(
   } = await supabase.auth.getUser();
 
   if (!user) return { success: false, error: "Não autorizado" };
+
+  await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
 
   const parsed = linkSchema.safeParse(input);
   if (!parsed.success) {
@@ -229,6 +238,8 @@ export async function setLinkThumbnail(
   } = await supabase.auth.getUser();
 
   if (!user) return { success: false, error: "Não autorizado" };
+
+  await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
 
   const { error } = await supabase
     .from("links")

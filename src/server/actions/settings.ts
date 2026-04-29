@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { BiohubAccessService } from "@/server/services/biohub-access-service";
 import type { ApiResponse } from "@/types";
 
 interface SaveSettingsParams {
@@ -37,6 +38,8 @@ export async function saveSettings(
   if (!user) {
     return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
   }
+
+  await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
 
   // Atualiza profile
   const { error: profileError } = await supabase

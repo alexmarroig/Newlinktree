@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { revalidateTag } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { BiohubAccessService } from "@/server/services/biohub-access-service";
 import { PAGE_CACHE_TAG_PREFIX } from "@/lib/constants";
 import { faqItemSchema } from "@/lib/validations";
 import type { ApiResponse, FaqItem } from "@/types";
@@ -34,6 +35,8 @@ export async function createFaqItem(
   } = await supabase.auth.getUser();
 
   if (!user) return { success: false, error: "Não autorizado" };
+
+  await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
 
   const isOwner = await getPageAndVerifyOwner(supabase, pageId, user.id);
   if (!isOwner) return { success: false, error: "Não autorizado" };
@@ -84,6 +87,8 @@ export async function updateFaqItem(
 
   if (!user) return { success: false, error: "Não autorizado" };
 
+  await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
+
   const isOwner = await getPageAndVerifyOwner(supabase, pageId, user.id);
   if (!isOwner) return { success: false, error: "Não autorizado" };
 
@@ -122,6 +127,8 @@ export async function deleteFaqItem(
 
   if (!user) return { success: false, error: "Não autorizado" };
 
+  await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
+
   const isOwner = await getPageAndVerifyOwner(supabase, pageId, user.id);
   if (!isOwner) return { success: false, error: "Não autorizado" };
 
@@ -148,6 +155,8 @@ export async function toggleFaqItem(
   } = await supabase.auth.getUser();
 
   if (!user) return { success: false, error: "Não autorizado" };
+
+  await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
 
   const isOwner = await getPageAndVerifyOwner(supabase, pageId, user.id);
   if (!isOwner) return { success: false, error: "Não autorizado" };
@@ -182,6 +191,8 @@ export async function reorderFaqItems(
   } = await supabase.auth.getUser();
 
   if (!user) return { success: false, error: "Não autorizado" };
+
+  await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
 
   const isOwner = await getPageAndVerifyOwner(supabase, pageId, user.id);
   if (!isOwner) return { success: false, error: "Não autorizado" };

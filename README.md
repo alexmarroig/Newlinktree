@@ -134,6 +134,20 @@ After setting env vars, trigger a redeploy from the Vercel dashboard.
 | `NEXT_PUBLIC_POSTHOG_HOST` | No | PostHog host URL |
 | `NEXT_PUBLIC_APP_URL` | Yes | Full URL of your deployment |
 | `NEXT_PUBLIC_DEFAULT_SLUG` | Yes | Page slug for root redirect |
+| `BIOHUB_ETHOS_INTEGRATION_ENABLED` | No | Feature flag da integração Ethos (`false` por padrão). Quando `false`, mantém comportamento legado integralmente. |
+| `ETHOS_API_BASE_URL` | Condicional | URL base da API Ethos (obrigatória quando a flag estiver `true`). |
+| `ETHOS_API_TOKEN` | Condicional | Token server-to-server para validar acesso no Ethos (obrigatório quando a flag estiver `true`). |
+| `ETHOS_UPGRADE_URL` | No | URL de upgrade exibida em negação de acesso (default: `https://ethos.biohub.app/upgrade`). |
+| `ETHOS_ACCESS_CACHE_TTL_SECONDS` | No | TTL do cache de autorização em segundos (default seguro: `60`). |
+| `ETHOS_REQUEST_TIMEOUT_MS` | No | Timeout das chamadas ao Ethos em ms (default seguro: `3000`). |
+
+
+### Ethos integration notes
+
+- **Fail-safe default:** `BIOHUB_ETHOS_INTEGRATION_ENABLED=false` mantém todo fluxo legado de escrita/publicação sem chamadas externas.
+- **Quando habilitado (`true`):** o backend valida acesso via `BiohubAccessService` antes de operações de escrita/publicação no admin.
+- **Falhas de configuração:** com a flag `true`, ausência/invalidade de `ETHOS_API_BASE_URL` ou `ETHOS_API_TOKEN` causa erro explícito de configuração para evitar publicação indevida.
+- **Defaults seguros:** `ETHOS_ACCESS_CACHE_TTL_SECONDS=60`, `ETHOS_REQUEST_TIMEOUT_MS=3000`, `ETHOS_UPGRADE_URL=https://ethos.biohub.app/upgrade`.
 
 ---
 

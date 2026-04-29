@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { BiohubAccessService } from "@/server/services/biohub-access-service";
 import {
   STORAGE_BUCKET_AVATARS,
   MAX_AVATAR_SIZE_BYTES,
@@ -22,6 +23,8 @@ export async function uploadAvatar(
   if (!user) {
     return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
   }
+
+  await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
 
   const file = formData.get("file") as File | null;
   if (!file) {

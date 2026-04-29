@@ -1,7 +1,18 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
+import { parseSsoSession, SSO_COOKIE_NAME } from "@/lib/auth/sso-session";
 import type { Database } from "@/types/database";
+
+
+function buildSsoRedirect(request: NextRequest, reason: "invalid" | "expired" | "upgrade") {
+  if (reason === "upgrade") {
+    return NextResponse.redirect(new URL("/auth/login?error=sso_upgrade_required", request.url));
+  }
+
+  const error = reason === "expired" ? "sso_token_expired" : "sso_invalid";
+  return NextResponse.redirect(new URL(`/auth/login?error=${error}`, request.url));
+}
 
 /**
  * Atualiza a sessão do Supabase no middleware do Next.js.
@@ -44,8 +55,25 @@ export async function updateSession(request: NextRequest) {
   const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
   const isLoginRoute = request.nextUrl.pathname.startsWith("/auth/login");
 
+  const ssoSession = parseSsoSession(request.cookies.get(SSO_COOKIE_NAME)?.value);
+  if (ssoSession) {
+    if (ssoSession.requires_upgrade) {
+      return buildSsoRedirect(request, "upgrade");
+    }
+
+    const isExpired = ssoSession.exp ? Date.now() >= ssoSession.exp * 1000 : false;
+    if (isExpired) {
+      return buildSsoRedirect(request, "expired");
+    }
+
+    const isWriteRequest = !["GET", "HEAD", "OPTIONS"].includes(request.method);
+    if (isWriteRequest && (!ssoSession.user_id || !ssoSession.tenant_id || !ssoSession.session_id)) {
+      return buildSsoRedirect(request, "invalid");
+    }
+  }
+
   // Protege rotas admin
-  if (isAdminRoute && !user) {
+  if (isAdminRoute && !user && !ssoSession) {
     const redirectUrl = new URL("/auth/login", request.url);
     redirectUrl.searchParams.set("redirect", request.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);
