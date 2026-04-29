@@ -1,5 +1,6 @@
 // Re-exporta todos os tipos de database
 export * from "./database";
+export * from "./access";
 
 // ---- Tipos de UI e domínio ----
 
