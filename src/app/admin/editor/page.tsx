@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { AccessBlockedBanner } from "@/components/ui/access-blocked-banner";
+import { AccessBlockedBanner } from "@/components/ui/AccessBlockedBanner";
 import { EditorLayout } from "@/features/editor/components/editor-layout";
 import { createClient } from "@/lib/supabase/server";
 
