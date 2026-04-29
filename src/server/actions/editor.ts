@@ -5,6 +5,8 @@ import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { PAGE_CACHE_TAG_PREFIX } from "@/lib/constants";
 import type { ApiResponse, Block } from "@/types";
+import { enforceEditPermission, enforcePublishPermission } from "@/server/access/authoring-guard";
+import type { AccessPermissions } from "@/server/access/types";
 
 /**
  * Salva o rascunho do editor — persiste blocos no banco.
@@ -12,7 +14,12 @@ import type { ApiResponse, Block } from "@/types";
 export async function saveEditorDraft(
   pageId: string,
   blocks: Block[],
+  permissions: AccessPermissions = { canEdit: true, canPublish: true, readOnly: false, reason: "legacy_default" },
 ): Promise<ApiResponse> {
+  const editBlock = enforceEditPermission(permissions);
+  if (editBlock) return editBlock;
+
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -63,7 +70,10 @@ export async function saveEditorDraft(
 /**
  * Publica a página — cria snapshot e atualiza status.
  */
-export async function publishPage(pageId: string): Promise<ApiResponse> {
+export async function publishPage(
+  pageId: string,
+  permissions: AccessPermissions = { canEdit: true, canPublish: true, readOnly: false, reason: "legacy_default" },
+): Promise<ApiResponse> {
   const supabase = await createClient();
   const {
     data: { user },
