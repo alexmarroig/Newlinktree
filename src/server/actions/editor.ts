@@ -12,6 +12,10 @@ import { PAGE_CACHE_TAG_PREFIX } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import type { ApiResponse, Block } from "@/types";
 import { RequireBiohubEditAccess, RequireBiohubPublishAccess } from "@/http/middleware/biohub-access";
+import { RequireBiohubEditAccess, RequireBiohubPublishAccess } from "@/http/middleware/biohub-access";
+import { PAGE_CACHE_TAG_PREFIX } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/server";
+import type { ApiResponse, Block } from "@/types";
 
 /**
  * Salva o rascunho do editor — persiste blocos no banco.
@@ -104,6 +108,13 @@ export async function saveEditorDraft(pageId: string, blocks: Block[]): Promise<
     reason_code: "OWNER_MATCH",
     latency_ms: accessLatencyMs,
   });
+
+    return {
+      success: false,
+      error: access.error ?? "Não autorizado",
+      code: access.code,
+    };
+  }
 
   const updates = blocks.map((block) =>
     supabase
@@ -215,6 +226,9 @@ export async function publishPage(pageId: string): Promise<ApiResponse> {
     reason_code: "OWNER_MATCH",
     latency_ms: accessLatencyMs,
   });
+
+    return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
+  }
 
   const [{ data: page }, { data: blocks }, { data: links }, { data: faqItems }] = await Promise.all([
     supabase.from("pages").select("*").eq("id", pageId).single(),
