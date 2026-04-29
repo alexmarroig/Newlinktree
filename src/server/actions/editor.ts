@@ -2,8 +2,12 @@
 
 import { revalidateTag } from "next/cache";
 
-import { createClient } from "@/lib/supabase/server";
+import {
+  RequireBiohubEditAccess,
+  RequireBiohubPublishAccess,
+} from "@/http/middleware/biohub-access";
 import { PAGE_CACHE_TAG_PREFIX } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/server";
 import type { ApiResponse, Block } from "@/types";
 
 /**
@@ -14,29 +18,14 @@ export async function saveEditorDraft(
   blocks: Block[],
 ): Promise<ApiResponse> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const access = await RequireBiohubEditAccess(supabase, pageId);
 
-  if (!user) {
-    return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
-  }
-
-  // Verifica que o usuário autenticado é dono da página
-  const { data: page } = await supabase
-    .from("pages")
-    .select("id, slug, profiles!inner(user_id)")
-    .eq("id", pageId)
-    .single();
-
-  if (!page) {
-    return { success: false, error: "Página não encontrada" };
-  }
-
-  // Garante que o perfil vinculado pertence ao usuário autenticado
-  const profile = page.profiles as unknown as { user_id: string };
-  if (profile.user_id !== user.id) {
-    return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
+  if (!access.ok) {
+    return {
+      success: false,
+      error: access.error ?? "Não autorizado",
+      code: access.code,
+    };
   }
 
   // Atualiza cada bloco com position e content_json
@@ -65,27 +54,21 @@ export async function saveEditorDraft(
  */
 export async function publishPage(pageId: string): Promise<ApiResponse> {
   const supabase = await createClient();
+  const access = await RequireBiohubPublishAccess(supabase, pageId);
+
+  if (!access.ok) {
+    return {
+      success: false,
+      error: access.error ?? "Não autorizado",
+      code: access.code,
+    };
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
-  }
-
-  // Verifica que o usuário autenticado é dono da página antes do snapshot
-  const { data: pageOwnerCheck } = await supabase
-    .from("pages")
-    .select("id, profiles!inner(user_id)")
-    .eq("id", pageId)
-    .single();
-
-  if (!pageOwnerCheck) {
-    return { success: false, error: "Página não encontrada" };
-  }
-
-  const ownerProfile = pageOwnerCheck.profiles as unknown as { user_id: string };
-  if (ownerProfile.user_id !== user.id) {
     return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
   }
 
