@@ -14,9 +14,9 @@
     "db:generate": "supabase db diff --use-migra",
     "db:push": "supabase db push",
     "db:reset": "supabase db reset",
-    "test": "node --test --experimental-strip-types test/unit/*.test.ts test/integration/*.test.ts",
-    "test:unit": "node --test --experimental-strip-types test/unit/*.test.ts",
-    "test:integration": "node --test --experimental-strip-types test/integration/*.test.ts"
+    "test": "rm -rf .test-dist && tsc -p tsconfig.test.json && node --test .test-dist/test/unit/*.test.js .test-dist/test/integration/*.test.js",
+    "test:unit": "rm -rf .test-dist && tsc -p tsconfig.test.json && node --test .test-dist/test/unit/*.test.js",
+    "test:integration": "rm -rf .test-dist && tsc -p tsconfig.test.json && node --test .test-dist/test/integration/*.test.js"
   },
   "dependencies": {
     "next": "^15.1.0",
