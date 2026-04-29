@@ -1,10 +1,16 @@
-import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+
+import { requireAdminWriteAccess } from "@/http/middleware/admin-write-access";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST() {
   const supabase = await createClient();
+  const access = await requireAdminWriteAccess(supabase);
 
-  // Atualiza todos os perfis que não têm avatar_url
+  if (!access.ok) {
+    return NextResponse.json({ error: access.error ?? "Não autorizado" }, { status: access.code === "UNAUTHORIZED" ? 401 : 403 });
+  }
+
   const { data, error } = await supabase
     .from("profiles")
     .update({
