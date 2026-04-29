@@ -1,9 +1,9 @@
 import { createHash, randomUUID } from "crypto";
 
 type LogLevel = "info" | "warn" | "error";
-type AccessAction = "edit" | "publish";
+type AccessAction = "edit" | "publish" | "write";
 type AccessStatus = "started" | "allowed" | "denied" | "success" | "error" | "degraded";
-type AccessSource = "ethos" | "local_policy";
+type AccessSource = "ethos" | "local_policy" | "cache" | "offline-fallback";
 
 interface BaseAccessLog {
   correlation_id?: string;
