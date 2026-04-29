@@ -5,6 +5,24 @@ import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { PAGE_CACHE_TAG_PREFIX } from "@/lib/constants";
 import type { ApiResponse, Block } from "@/types";
+import { biohubAccessService } from "@/domain/access/BiohubAccessService";
+import type { BiohubPlan, BiohubAccessStatus } from "@/types";
+
+function resolveUserPlan(rawPlan?: unknown): BiohubPlan {
+  if (rawPlan === "free" || rawPlan === "pro" || rawPlan === "enterprise") {
+    return rawPlan;
+  }
+
+  return "pro";
+}
+
+function resolveUserStatus(rawStatus?: unknown): BiohubAccessStatus {
+  if (rawStatus === "granted" || rawStatus === "denied") {
+    return rawStatus;
+  }
+
+  return "granted";
+}
 
 /**
  * Salva o rascunho do editor — persiste blocos no banco.
@@ -20,6 +38,19 @@ export async function saveEditorDraft(
 
   if (!user) {
     return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
+  }
+
+  const access = biohubAccessService.resolveAccess(
+    {
+      id: user.id,
+      plan: resolveUserPlan(user.user_metadata?.biohub_plan),
+      status: resolveUserStatus(user.user_metadata?.biohub_status),
+    },
+    "edit",
+  );
+
+  if (!access.can_edit) {
+    return { success: false, error: "Acesso bloqueado para edição", code: access.reason_code };
   }
 
   // Verifica que o usuário autenticado é dono da página
@@ -71,6 +102,23 @@ export async function publishPage(pageId: string): Promise<ApiResponse> {
 
   if (!user) {
     return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
+  }
+
+  const access = biohubAccessService.resolveAccess(
+    {
+      id: user.id,
+      plan: resolveUserPlan(user.user_metadata?.biohub_plan),
+      status: resolveUserStatus(user.user_metadata?.biohub_status),
+    },
+    "publish",
+  );
+
+  if (!access.can_publish) {
+    return {
+      success: false,
+      error: "Acesso bloqueado para publicação",
+      code: access.reason_code,
+    };
   }
 
   // Verifica que o usuário autenticado é dono da página antes do snapshot
