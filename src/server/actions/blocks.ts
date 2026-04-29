@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { revalidateTag } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { BiohubAccessService } from "@/server/services/biohub-access-service";
 import { PAGE_CACHE_TAG_PREFIX } from "@/lib/constants";
 import type { ApiResponse } from "@/types";
 
@@ -14,6 +15,8 @@ export async function toggleBlockEnabled(blockId: string): Promise<ApiResponse> 
   } = await supabase.auth.getUser();
 
   if (!user) return { success: false, error: "Não autorizado" };
+
+  await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
 
   const { data: block } = await supabase
     .from("blocks")

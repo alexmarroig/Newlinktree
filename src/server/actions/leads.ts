@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { BiohubAccessService } from "@/server/services/biohub-access-service";
 import { leadStatusSchema } from "@/lib/validations";
 import type { ApiResponse, LeadStatus } from "@/types";
 
@@ -23,6 +24,8 @@ export async function updateLeadStatus(
   if (!user) {
     return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
   }
+
+  await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
 
   const { error } = await supabase
     .from("form_submissions")
