@@ -5,6 +5,10 @@ export const APP_URL =
 export const DEFAULT_SLUG =
   process.env.NEXT_PUBLIC_DEFAULT_SLUG ?? "Camila-Freitas";
 
+// ---- Upgrade ----
+export const ETHOS_UPGRADE_URL =
+  process.env.NEXT_PUBLIC_ETHOS_UPGRADE_URL ?? "https://ethos.example.com/upgrade";
+
 // ---- Supabase Storage Buckets ----
 export const STORAGE_BUCKET_AVATARS = "avatars";
 export const STORAGE_BUCKET_PDFS = "pdfs";

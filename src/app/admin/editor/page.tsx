@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { AccessBlockedBanner } from "@/components/ui/access-blocked-banner";
 import { EditorLayout } from "@/features/editor/components/editor-layout";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Editor Visual",
   robots: "noindex",
+};
+
+type AccessMeta = {
+  can_edit?: boolean;
+  reason_code?: string | null;
+  status?: string | null;
 };
 
 export default async function EditorPage() {
@@ -25,6 +32,20 @@ export default async function EditorPage() {
     .single();
 
   if (!profile) redirect("/admin");
+
+  const accessMeta = (user.user_metadata?.editor_access ?? {}) as AccessMeta;
+  const isBlocked = accessMeta.can_edit === false;
+
+  if (isBlocked) {
+    return (
+      <div className="mx-auto w-full max-w-3xl py-8">
+        <AccessBlockedBanner
+          reasonCode={accessMeta.reason_code}
+          status={accessMeta.status}
+        />
+      </div>
+    );
+  }
 
   // Carrega a primeira página do perfil
   const { data: page } = await supabase
