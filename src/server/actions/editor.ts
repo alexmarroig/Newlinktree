@@ -2,19 +2,15 @@
 
 import { revalidateTag } from "next/cache";
 
+import { PAGE_CACHE_TAG_PREFIX } from "@/lib/constants";
 import {
   logAccessDecision,
   logDegradedFallback,
   logEthosQueryFinished,
   logEthosQueryStarted,
 } from "@/lib/helpers/access-logger";
-import { PAGE_CACHE_TAG_PREFIX } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
-import type { ApiResponse, Block } from "@/types";
 import { RequireBiohubEditAccess, RequireBiohubPublishAccess } from "@/http/middleware/biohub-access";
-import { RequireBiohubEditAccess, RequireBiohubPublishAccess } from "@/http/middleware/biohub-access";
-import { PAGE_CACHE_TAG_PREFIX } from "@/lib/constants";
-import { createClient } from "@/lib/supabase/server";
 import type { ApiResponse, Block } from "@/types";
 
 /**
@@ -109,12 +105,6 @@ export async function saveEditorDraft(pageId: string, blocks: Block[]): Promise<
     latency_ms: accessLatencyMs,
   });
 
-    return {
-      success: false,
-      error: access.error ?? "Não autorizado",
-      code: access.code,
-    };
-  }
 
   const updates = blocks.map((block) =>
     supabase
@@ -227,8 +217,6 @@ export async function publishPage(pageId: string): Promise<ApiResponse> {
     latency_ms: accessLatencyMs,
   });
 
-    return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
-  }
 
   const [{ data: page }, { data: blocks }, { data: links }, { data: faqItems }] = await Promise.all([
     supabase.from("pages").select("*").eq("id", pageId).single(),
