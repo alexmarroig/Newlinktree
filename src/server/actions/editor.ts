@@ -3,6 +3,7 @@
 import { revalidateTag } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { BiohubAccessService } from "@/server/services/biohub-access-service";
 import { PAGE_CACHE_TAG_PREFIX } from "@/lib/constants";
 import type { ApiResponse, Block } from "@/types";
 
@@ -21,6 +22,8 @@ export async function saveEditorDraft(
   if (!user) {
     return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
   }
+
+  await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
 
   // Verifica que o usuário autenticado é dono da página
   const { data: page } = await supabase

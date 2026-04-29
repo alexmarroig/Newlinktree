@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { revalidateTag } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { BiohubAccessService } from "@/server/services/biohub-access-service";
 import { seoSchema, type SeoSchema } from "@/lib/validations";
 import { PAGE_CACHE_TAG_PREFIX } from "@/lib/constants";
 import type { ApiResponse } from "@/types";
@@ -25,6 +26,8 @@ export async function saveSeo(
   if (!user) {
     return { success: false, error: "Não autorizado", code: "UNAUTHORIZED" };
   }
+
+  await BiohubAccessService.assertAccess({ userId: user.id, action: "write" });
 
   const { data: page, error } = await supabase
     .from("pages")
