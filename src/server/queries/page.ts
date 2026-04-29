@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PAGE_CACHE_TAG_PREFIX } from "@/lib/constants";
 import type { PageData } from "@/types";
 import type { Database } from "@/types/database";
+import { biohubAccessService } from "@/domain/access/BiohubAccessService";
 
 /**
  * Carrega todos os dados necessários para renderizar a página pública.
@@ -15,6 +16,15 @@ export async function getPublicPageData(
 ): Promise<PageData | null> {
   return unstable_cache(
     async () => {
+      const publicAccess = biohubAccessService.resolveAccess(
+        { id: "public-anonymous" },
+        "read_public",
+      );
+
+      if (!publicAccess.biohub_access) {
+        return null;
+      }
+
       // Use plain client without cookies — public data doesn't need user session,
       // and cookies() cannot be called inside unstable_cache in Next.js 15.
       const supabase = createSupabaseClient<Database>(
