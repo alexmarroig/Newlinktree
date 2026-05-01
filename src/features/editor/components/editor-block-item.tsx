@@ -10,8 +10,8 @@ import {
   GripVertical,
   Heart,
   HelpCircle,
-  LayoutBottom,
   MousePointerClick,
+  PanelBottom,
   Settings2,
   Sparkles,
   ToggleLeft,
@@ -32,7 +32,7 @@ const BLOCK_ICONS: Record<string, React.ElementType> = {
   about: Heart,
   resources: BookOpen,
   faq: HelpCircle,
-  footer: LayoutBottom,
+  footer: PanelBottom,
 };
 
 interface EditorBlockItemProps {

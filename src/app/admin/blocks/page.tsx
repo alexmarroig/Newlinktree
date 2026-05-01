@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { BlocksManager } from "@/components/admin/blocks/blocks-manager";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentAccount } from "@/server/account";
 
 export const metadata: Metadata = {
   title: "Blocos",
@@ -11,29 +12,10 @@ export const metadata: Metadata = {
 
 export default async function BlocksPage() {
   const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user, profile, page } = await getCurrentAccount(supabase);
 
   if (!user) redirect("/auth/login");
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("user_id", user.id)
-    .single();
-
-  if (!profile) redirect("/admin");
-
-  const { data: page } = await supabase
-    .from("pages")
-    .select("id, slug")
-    .eq("profile_id", profile.id)
-    .limit(1)
-    .single();
-
-  if (!page) redirect("/admin");
+  if (!profile || !page) redirect("/admin");
 
   const { data: blocks } = await supabase
     .from("blocks")
@@ -41,5 +23,7 @@ export default async function BlocksPage() {
     .eq("page_id", page.id)
     .order("position", { ascending: true });
 
-  return <BlocksManager pageId={page.id} pageSlug={page.slug} blocks={blocks ?? []} />;
+  return (
+    <BlocksManager pageId={page.id} pageSlug={page.slug} blocks={blocks ?? []} />
+  );
 }

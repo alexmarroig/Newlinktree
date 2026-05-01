@@ -50,6 +50,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
+        Relationships: [];
       };
       themes: {
         Row: {
@@ -121,6 +122,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["themes"]["Insert"]>;
+        Relationships: [];
       };
       pages: {
         Row: {
@@ -154,6 +156,7 @@ export type Database = {
           published_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["pages"]["Insert"]>;
+        Relationships: [];
       };
       blocks: {
         Row: {
@@ -181,6 +184,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["blocks"]["Insert"]>;
+        Relationships: [];
       };
       links: {
         Row: {
@@ -234,6 +238,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["links"]["Insert"]>;
+        Relationships: [];
       };
       assets: {
         Row: {
@@ -261,6 +266,7 @@ export type Database = {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["assets"]["Insert"]>;
+        Relationships: [];
       };
       faq_items: {
         Row: {
@@ -284,6 +290,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["faq_items"]["Insert"]>;
+        Relationships: [];
       };
       form_submissions: {
         Row: {
@@ -331,6 +338,7 @@ export type Database = {
         Update: Partial<
           Database["public"]["Tables"]["form_submissions"]["Insert"]
         >;
+        Relationships: [];
       };
       lead_notes: {
         Row: {
@@ -348,6 +356,7 @@ export type Database = {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["lead_notes"]["Insert"]>;
+        Relationships: [];
       };
       published_versions: {
         Row: {
@@ -369,6 +378,7 @@ export type Database = {
         Update: Partial<
           Database["public"]["Tables"]["published_versions"]["Insert"]
         >;
+        Relationships: [];
       };
       settings: {
         Row: {
@@ -398,8 +408,142 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["settings"]["Insert"]>;
+        Relationships: [];
+      };
+      subscriptions: {
+        Row: {
+          id: string;
+          profile_id: string;
+          plan_code: "professional" | "premium";
+          status:
+            | "trialing"
+            | "pending"
+            | "active"
+            | "past_due"
+            | "paused"
+            | "canceled"
+            | "expired";
+          provider: string;
+          provider_subscription_id: string | null;
+          provider_customer_id: string | null;
+          checkout_url: string | null;
+          trial_ends_at: string | null;
+          current_period_ends_at: string | null;
+          canceled_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          profile_id: string;
+          plan_code?: "professional" | "premium";
+          status?:
+            | "trialing"
+            | "pending"
+            | "active"
+            | "past_due"
+            | "paused"
+            | "canceled"
+            | "expired";
+          provider?: string;
+          provider_subscription_id?: string | null;
+          provider_customer_id?: string | null;
+          checkout_url?: string | null;
+          trial_ends_at?: string | null;
+          current_period_ends_at?: string | null;
+          canceled_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["subscriptions"]["Insert"]
+        >;
+        Relationships: [];
+      };
+      billing_events: {
+        Row: {
+          id: string;
+          provider: string;
+          provider_event_id: string;
+          event_type: string;
+          payload_json: Json;
+          processed_at: string;
+        };
+        Insert: {
+          id?: string;
+          provider?: string;
+          provider_event_id: string;
+          event_type: string;
+          payload_json: Json;
+          processed_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["billing_events"]["Insert"]
+        >;
+        Relationships: [];
+      };
+      page_templates: {
+        Row: {
+          id: string;
+          code: string;
+          name: string;
+          description: string | null;
+          blocks_json: Json;
+          links_json: Json;
+          faq_json: Json;
+          is_active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          code: string;
+          name: string;
+          description?: string | null;
+          blocks_json: Json;
+          links_json?: Json;
+          faq_json?: Json;
+          is_active?: boolean;
+          created_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["page_templates"]["Insert"]
+        >;
+        Relationships: [];
       };
     };
+    Views: Record<string, never>;
+    Functions: {
+      get_leads_by_day: {
+        Args: {
+          p_profile_id: string;
+          days_back?: number;
+        };
+        Returns: Array<{
+          day: string;
+          count: number;
+        }>;
+      };
+      get_link_stats: {
+        Args: {
+          p_page_id: string;
+        };
+        Returns: Array<{
+          link_id: string;
+          label: string;
+          type: string;
+          click_count: number;
+          ctr: number;
+        }>;
+      };
+      increment_link_click: {
+        Args: {
+          link_id: string;
+        };
+        Returns: undefined;
+      };
+    };
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 };
 
@@ -452,3 +596,10 @@ export type LeadNote = Database["public"]["Tables"]["lead_notes"]["Row"];
 export type PublishedVersion =
   Database["public"]["Tables"]["published_versions"]["Row"];
 export type Settings = Database["public"]["Tables"]["settings"]["Row"];
+export type Subscription =
+  Database["public"]["Tables"]["subscriptions"]["Row"];
+export type BillingEvent =
+  Database["public"]["Tables"]["billing_events"]["Row"];
+export type PageTemplate =
+  Database["public"]["Tables"]["page_templates"]["Row"];
+

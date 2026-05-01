@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { AccessBlockedBanner } from "@/components/ui/AccessBlockedBanner";
 import { EditorLayout } from "@/features/editor/components/editor-layout";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentAccount } from "@/server/account";
 
 export const metadata: Metadata = {
   title: "Editor Visual",
@@ -18,19 +19,9 @@ type AccessMeta = {
 
 export default async function EditorPage() {
   const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user, profile, page } = await getCurrentAccount(supabase);
 
   if (!user) redirect("/auth/login");
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("user_id", user.id)
-    .single();
-
   if (!profile) redirect("/admin");
 
   const accessMeta = (user.user_metadata?.editor_access ?? {}) as AccessMeta;
@@ -48,14 +39,6 @@ export default async function EditorPage() {
   }
 
   // Carrega a primeira página do perfil
-  const { data: page } = await supabase
-    .from("pages")
-    .select("id, slug, status, title")
-    .eq("profile_id", profile.id)
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .single();
-
   if (!page) {
     return (
       <div className="flex flex-col items-center gap-4 py-16 text-center">

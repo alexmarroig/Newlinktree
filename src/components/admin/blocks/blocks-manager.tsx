@@ -7,8 +7,8 @@ import {
   Compass,
   Heart,
   HelpCircle,
-  LayoutBottom,
   MousePointerClick,
+  PanelBottom,
   Sparkles,
   ToggleLeft,
   ToggleRight,
@@ -33,7 +33,7 @@ const BLOCK_ICONS: Record<string, React.ElementType> = {
   about: Heart,
   resources: BookOpen,
   faq: HelpCircle,
-  footer: LayoutBottom,
+  footer: PanelBottom,
 };
 
 interface BlocksManagerProps {

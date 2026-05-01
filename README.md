@@ -115,7 +115,7 @@ In your Vercel project, go to **Settings → Environment Variables** and add all
 | `NEXT_PUBLIC_POSTHOG_KEY` | Your PostHog project key (optional) |
 | `NEXT_PUBLIC_POSTHOG_HOST` | `https://app.posthog.com` |
 | `NEXT_PUBLIC_APP_URL` | Your Vercel domain, e.g. `https://yourdomain.vercel.app` |
-| `NEXT_PUBLIC_DEFAULT_SLUG` | The page slug, e.g. `ana-silva` |
+| `MERCADO_PAGO_ACCESS_TOKEN` | Token de acesso para checkout de assinaturas |
 
 ### 4. Redeploy
 
@@ -133,13 +133,15 @@ After setting env vars, trigger a redeploy from the Vercel dashboard.
 | `NEXT_PUBLIC_POSTHOG_KEY` | No | PostHog project API key |
 | `NEXT_PUBLIC_POSTHOG_HOST` | No | PostHog host URL |
 | `NEXT_PUBLIC_APP_URL` | Yes | Full URL of your deployment |
-| `NEXT_PUBLIC_DEFAULT_SLUG` | Yes | Page slug for root redirect |
 | `BIOHUB_ETHOS_INTEGRATION_ENABLED` | No | Feature flag da integração Ethos (`false` por padrão). Quando `false`, mantém comportamento legado integralmente. |
 | `ETHOS_API_BASE_URL` | Condicional | URL base da API Ethos (obrigatória quando a flag estiver `true`). |
 | `ETHOS_API_TOKEN` | Condicional | Token server-to-server para validar acesso no Ethos (obrigatório quando a flag estiver `true`). |
 | `ETHOS_UPGRADE_URL` | No | URL de upgrade exibida em negação de acesso (default: `https://ethos.biohub.app/upgrade`). |
 | `ETHOS_ACCESS_CACHE_TTL_SECONDS` | No | TTL do cache de autorização em segundos (default seguro: `60`). |
 | `ETHOS_REQUEST_TIMEOUT_MS` | No | Timeout das chamadas ao Ethos em ms (default seguro: `3000`). |
+| `NEXT_PUBLIC_ETHOS_SITE_URL` | No | Site principal ETHOS usado para navegaÃ§Ã£o entre produtos. |
+| `MERCADO_PAGO_ACCESS_TOKEN` | Yes for billing | Token de acesso do Mercado Pago para assinaturas |
+| `MERCADO_PAGO_WEBHOOK_SECRET` | No | Reservado para validaÃ§Ã£o de webhook |
 
 
 ### Ethos integration notes
@@ -213,3 +215,27 @@ npm run type-check   # TypeScript check
 npm run lint         # ESLint
 npm run format       # Prettier
 ```
+
+---
+
+## ETHOS Integration
+
+ETHOS should be the product/marketing entry point at `ethos-clinic.com`.
+BioHub should run as an independent app, preferably at `biohub.ethos-clinic.com`.
+
+Recommended ETHOS links:
+
+- `https://biohub.ethos-clinic.com/pricing`
+- `https://biohub.ethos-clinic.com/auth/register`
+- `https://biohub.ethos-clinic.com/auth/login`
+
+Payments can be started from ETHOS or BioHub, but BioHub subscription status should have a single source of truth. In this repo, the source of truth is the `subscriptions` table updated by the Mercado Pago checkout/webhook flow.
+
+Set this in BioHub environments:
+
+```env
+NEXT_PUBLIC_APP_URL=https://biohub.ethos-clinic.com
+NEXT_PUBLIC_ETHOS_SITE_URL=https://ethos-clinic.com
+```
+
+See `docs/ethos-integration.md` for the full integration contract and implementation prompt for the ETHOS repo.

@@ -25,6 +25,14 @@ export default async function AnalyticsPage() {
 
   if (!profile) return null;
 
+  const { data: page } = await supabase
+    .from("pages")
+    .select("id")
+    .eq("profile_id", profile.id)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .single();
+
   // Dados de negócio do Supabase (contagens precisas)
   const [
     { count: totalLeads },
@@ -49,12 +57,15 @@ export default async function AnalyticsPage() {
       .eq("status", "contacted"),
 
     // Leads dos últimos 30 dias agrupados por dia
-    supabase.rpc("get_leads_by_day", { days_back: 30 }).throwOnError(),
+    supabase
+      .rpc("get_leads_by_day", { p_profile_id: profile.id, days_back: 30 })
+      .throwOnError(),
 
     // Links mais clicados
     supabase
       .from("links")
       .select("id, label, type, click_count")
+      .eq("page_id", page?.id ?? "")
       .order("click_count", { ascending: false })
       .limit(10),
 

@@ -6,14 +6,20 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import { DEFAULT_SLUG } from "@/lib/constants";
 
 interface AdminHeaderProps {
   userName: string;
   userAvatar?: string;
+  pageSlug?: string;
+  subscriptionStatus?: string;
 }
 
-export function AdminHeader({ userName, userAvatar }: AdminHeaderProps) {
+export function AdminHeader({
+  userName,
+  userAvatar,
+  pageSlug,
+  subscriptionStatus,
+}: AdminHeaderProps) {
   const { signOut } = useAuth();
   const initials = userName
     .split(" ")
@@ -24,21 +30,25 @@ export function AdminHeader({ userName, userAvatar }: AdminHeaderProps) {
 
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-border bg-card/95 px-6 backdrop-blur-sm">
-      {/* Espaçador mobile (hamburger futuro) */}
       <div className="lg:hidden" />
 
-      {/* Ações */}
-      <div className="flex items-center gap-3 ml-auto">
-        <Button variant="outline" size="sm" asChild>
-          <Link
-            href={`/${DEFAULT_SLUG}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <ExternalLink className="h-3.5 w-3.5" />
-            Ver página
-          </Link>
-        </Button>
+      <div className="ml-auto flex items-center gap-3">
+        {subscriptionStatus && subscriptionStatus !== "active" && (
+          <span className="hidden rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800 sm:inline-flex">
+            {subscriptionStatus === "trialing"
+              ? "Teste ativo"
+              : "Assinatura pendente"}
+          </span>
+        )}
+
+        {pageSlug && (
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/${pageSlug}`} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-3.5 w-3.5" />
+              Ver página
+            </Link>
+          </Button>
+        )}
 
         <div className="flex items-center gap-2">
           <Avatar className="h-8 w-8">

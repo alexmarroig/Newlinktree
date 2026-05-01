@@ -7,6 +7,18 @@ import type { PageData } from "@/types";
 import type { Database } from "@/types/database";
 import { biohubAccessService } from "@/domain/access/BiohubAccessService";
 
+type PublicLink = Database["public"]["Tables"]["links"]["Row"];
+
+function isTccDownloadLink(link: PublicLink) {
+  const label = link.label.toLocaleLowerCase("pt-BR");
+  const sublabel = link.sublabel?.toLocaleLowerCase("pt-BR") ?? "";
+
+  return (
+    link.type === "download" &&
+    (label.includes("tcc") || sublabel.includes("tcc"))
+  );
+}
+
 /**
  * Carrega todos os dados necessários para renderizar a página pública.
  * Cacheado por slug com revalidação por tag.
@@ -27,7 +39,7 @@ export async function getPublicPageData(
 
       // Use plain client without cookies — public data doesn't need user session,
       // and cookies() cannot be called inside unstable_cache in Next.js 15.
-      const supabase = createSupabaseClient<Database>(
+      const supabase = createSupabaseClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       );
@@ -98,7 +110,7 @@ export async function getPublicPageData(
         theme,
         page,
         blocks: blocks ?? [],
-        links: links ?? [],
+        links: (links ?? []).filter((link) => !isTccDownloadLink(link)),
         faqItems: faqItems ?? [],
         settings,
       } as PageData;

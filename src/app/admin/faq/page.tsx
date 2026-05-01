@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { FaqManager } from "@/components/admin/faq/faq-manager";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentAccount } from "@/server/account";
 
 export const metadata: Metadata = {
   title: "FAQ",
@@ -11,29 +12,10 @@ export const metadata: Metadata = {
 
 export default async function FaqPage() {
   const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user, profile, page } = await getCurrentAccount(supabase);
 
   if (!user) redirect("/auth/login");
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("user_id", user.id)
-    .single();
-
-  if (!profile) redirect("/admin");
-
-  const { data: page } = await supabase
-    .from("pages")
-    .select("id")
-    .eq("profile_id", profile.id)
-    .limit(1)
-    .single();
-
-  if (!page) redirect("/admin");
+  if (!profile || !page) redirect("/admin");
 
   const { data: items } = await supabase
     .from("faq_items")

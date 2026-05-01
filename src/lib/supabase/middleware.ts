@@ -2,8 +2,6 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { parseSsoSession, SSO_COOKIE_NAME } from "@/lib/auth/sso-session";
-import type { Database } from "@/types/database";
-
 
 function buildSsoRedirect(request: NextRequest, reason: "invalid" | "expired" | "upgrade") {
   if (reason === "upgrade") {
@@ -23,7 +21,7 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
-  const supabase = createServerClient<Database>(
+  const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -31,7 +29,13 @@ export async function updateSession(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(
+          cookiesToSet: Array<{
+            name: string;
+            value: string;
+            options?: Parameters<typeof supabaseResponse.cookies.set>[2];
+          }>,
+        ) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );

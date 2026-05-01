@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { LinksManager } from "@/components/admin/links/links-manager";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentAccount } from "@/server/account";
 
 export const metadata: Metadata = {
   title: "Conteúdo",
@@ -12,27 +13,10 @@ export const metadata: Metadata = {
 export default async function LinksPage() {
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user, profile, page } = await getCurrentAccount(supabase);
 
   if (!user) redirect("/auth/login");
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("user_id", user.id)
-    .single();
-
   if (!profile) redirect("/admin/settings");
-
-  const { data: page } = await supabase
-    .from("pages")
-    .select("id, slug")
-    .eq("profile_id", profile.id)
-    .limit(1)
-    .single();
-
   if (!page) redirect("/admin/settings");
 
   const [{ data: links }, { data: theme }] = await Promise.all([

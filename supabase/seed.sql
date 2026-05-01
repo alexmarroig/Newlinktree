@@ -1,6 +1,6 @@
 -- ============================================================
--- THERAPY BIO HUB — Seed Data
--- Camila Freitas (VERSÃO FINAL LIMPA)
+-- THERAPY BIO HUB - Seed Data
+-- Camila Freitas (clean version without TCC resources)
 -- ============================================================
 
 DO $$
@@ -11,26 +11,16 @@ DECLARE
   v_theme_id    UUID := gen_random_uuid();
   v_settings_id UUID := gen_random_uuid();
 
-  v_block_hero_id        UUID := gen_random_uuid();
-  v_block_creds_id       UUID := gen_random_uuid();
-  v_block_start_id       UUID := gen_random_uuid();
-  v_block_ctas_id        UUID := gen_random_uuid();
-  v_block_about_id       UUID := gen_random_uuid();
-  v_block_resources_id   UUID := gen_random_uuid();
-  v_block_faq_id         UUID := gen_random_uuid();
-  v_block_footer_id      UUID := gen_random_uuid();
+  v_block_hero_id   UUID := gen_random_uuid();
+  v_block_creds_id  UUID := gen_random_uuid();
+  v_block_ctas_id   UUID := gen_random_uuid();
+  v_block_footer_id UUID := gen_random_uuid();
 
-  v_link_whatsapp_id UUID := gen_random_uuid();
-  v_link_form_id     UUID := gen_random_uuid();
-  v_link_site_id     UUID := gen_random_uuid();
+  v_link_whatsapp_id  UUID := gen_random_uuid();
+  v_link_site_id      UUID := gen_random_uuid();
   v_link_instagram_id UUID := gen_random_uuid();
-  v_link_how_id      UUID := gen_random_uuid();
-
 BEGIN
 
--- ============================================================
--- PERFIL
--- ============================================================
 INSERT INTO public.profiles (
   id, user_id, name, professional_title, crp,
   bio, subtitle, whatsapp_number, instagram_url, website_url, avatar_url
@@ -38,19 +28,16 @@ INSERT INTO public.profiles (
   v_profile_id,
   v_user_id,
   'Camila Freitas',
-  'Psicóloga Clínica',
+  'Psicologa Clinica',
   'CRP 06/201444',
-  'Psicóloga especializada em psicoterapia para adultos, com foco em ansiedade, autoconhecimento e transições de vida.',
-  'Atendimentos online e presenciais · São Paulo, SP',
+  'Psicologa especializada em psicoterapia para adultos, com foco em ansiedade, autoconhecimento e transicoes de vida.',
+  'Atendimentos online e presenciais - Sao Paulo, SP',
   '5511943937007',
   'https://instagram.com/psi.cavfreitas',
   'https://www.psicavfreitas.com.br',
   'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&crop=face'
 );
 
--- ============================================================
--- TEMA
--- ============================================================
 INSERT INTO public.themes (
   id, profile_id,
   primary_color, secondary_color, background_color,
@@ -68,9 +55,6 @@ INSERT INTO public.themes (
   'lg', 'soft', 'narrow', 'elevated'
 );
 
--- ============================================================
--- PÁGINA
--- ============================================================
 INSERT INTO public.pages (
   id, profile_id, slug, title, status,
   seo_title, seo_description,
@@ -78,81 +62,30 @@ INSERT INTO public.pages (
 ) VALUES (
   v_page_id, v_profile_id,
   'camila-freitas',
-  'Camila Freitas — Psicóloga Clínica',
+  'Camila Freitas - Psicologa Clinica',
   'published',
-  'Camila Freitas | Psicóloga Clínica',
-  'Psicóloga clínica especializada em psicoterapia para adultos.',
+  'Camila Freitas | Psicologa Clinica',
+  'Psicologa clinica especializada em psicoterapia para adultos.',
   now()
 );
 
--- ============================================================
--- BLOCOS
--- ============================================================
-
-INSERT INTO public.blocks (id, page_id, type, position, content_json) VALUES (
+INSERT INTO public.blocks (id, page_id, type, position, content_json) VALUES
+(
   v_block_hero_id, v_page_id, 'hero', 0,
-  '{
-    "tagline": "Psicoterapia com presença e cuidado",
-    "highlightText": "Um espaço seguro para se conhecer melhor"
-  }'::jsonb
-);
-
-INSERT INTO public.blocks (id, page_id, type, position, content_json) VALUES (
+  '{"tagline":"Psicoterapia com presenca e cuidado","highlightText":"Um espaco seguro para se conhecer melhor"}'::jsonb
+),
+(
   v_block_creds_id, v_page_id, 'credentials', 1,
-  '{
-    "modality": "Online e Presencial",
-    "location": "São Paulo, SP",
-    "audience": "Adultos",
-    "approach": "Psicanálise",
-    "sessionDuration": "50 minutos",
-    "languages": "Português"
-  }'::jsonb
-);
-
-INSERT INTO public.blocks (id, page_id, type, position, content_json) VALUES (
-<<<<<<< HEAD
+  '{"modality":"Online e Presencial","location":"Sao Paulo, SP","audience":"Adultos","approach":"Psicanalise","sessionDuration":"50 minutos","languages":"Portugues"}'::jsonb
+),
+(
   v_block_ctas_id, v_page_id, 'ctas', 2,
-  '{"layout": "stack"}'::jsonb
-=======
-  v_block_start_id, v_page_id, 'start_here', 2,
-  '{
-    "cards": [
-      {
-        "id": "card-1",
-        "title": "Quero iniciar terapia",
-        "description": "Entre em contato para conversarmos sobre como posso te ajudar",
-        "icon": "MessageCircle",
-        "linkType": "whatsapp"
-      },
-      {
-        "id": "card-2",
-        "title": "Como funciona?",
-        "description": "Entenda o processo terapêutico e o que esperar das sessões",
-        "icon": "HelpCircle",
-        "linkType": "scroll"
-      },
-      {
-        "id": "card-3",
-        "title": "Conheça meu trabalho",
-        "description": "Saiba mais sobre minha abordagem e formação",
-        "icon": "BookOpen",
-        "linkType": "url"
-      }
-    ]
-  }'::jsonb
->>>>>>> e9a9ccf (Remove TCC button from seed data)
-);
-
-INSERT INTO public.blocks (id, page_id, type, position, content_json) VALUES (
+  '{"layout":"stack"}'::jsonb
+),
+(
   v_block_footer_id, v_page_id, 'footer', 3,
-  '{
-    "copyrightText": "© 2025 Camila Freitas. CRP 06/201444"
-  }'::jsonb
+  '{"copyrightText":"2025 Camila Freitas. CRP 06/201444"}'::jsonb
 );
-
--- ============================================================
--- LINKS
--- ============================================================
 
 INSERT INTO public.links (
   id, page_id, block_id, label, type,
@@ -163,53 +96,7 @@ INSERT INTO public.links (
   'Quero iniciar terapia',
   'whatsapp',
   null,
-<<<<<<< HEAD
-  'Olá, Camila! Vim pelo seu site e gostaria de iniciar terapia 😊',
-=======
-  'Olá, Ana Clara! Vim pelo seu perfil e gostaria de saber mais sobre como iniciar o processo terapêutico. 😊',
-  'primary', 0
-),
-(
-  v_link_form_id, v_page_id, v_block_ctas_id,
-  'Formulário de interesse',
-  'Preencha e entrarei em contato',
-  'form', 'ClipboardList',
-  null, null, 'secondary', 1
-),
-(
-  v_link_site_id, v_page_id, v_block_ctas_id,
-  'Conhecer meu site',
-  'Saiba mais sobre minha formação e abordagem',
-  'url', 'Globe',
-  'https://anaclarasilva.com.br', null,
-  'ghost', 2
-),
-(
-  v_link_instagram_id, v_page_id, v_block_ctas_id,
-  'Ver meu Instagram',
-  'Conteúdo sobre saúde mental e psicologia',
-  'instagram', 'Instagram',
-  'https://instagram.com/anaclarasilva.psi', null,
-  'ghost', 3
-),
-(
-  v_link_how_id, v_page_id, v_block_ctas_id,
-  'Como funciona a psicoterapia?',
-  'Entenda o processo antes de começar',
-  'scroll', 'HelpCircle',
-  '#faq', null,
-  'ghost', 4
-);
-
--- ============================================================
--- FAQ ITEMS
--- ============================================================
-INSERT INTO public.faq_items (page_id, question, answer, position) VALUES
-(
-  v_page_id,
-  'Nunca fiz terapia, como é a primeira sessão?',
-  'É uma conversa tranquila para te conhecer e entender o que você está vivendo. Você não precisa chegar sabendo o que dizer: eu te ajudo a organizar isso com calma.',
->>>>>>> e9a9ccf (Remove TCC button from seed data)
+  'Ola, Camila! Vim pelo seu site e gostaria de iniciar terapia.',
   0
 ),
 (
@@ -229,18 +116,14 @@ INSERT INTO public.faq_items (page_id, question, answer, position) VALUES
   2
 );
 
--- ============================================================
--- SETTINGS
--- ============================================================
-
 INSERT INTO public.settings (
   id, profile_id, consent_text, site_url, contact_email, whatsapp_default_message
 ) VALUES (
   v_settings_id, v_profile_id,
-  'Concordo com a política de privacidade conforme LGPD.',
+  'Concordo com a politica de privacidade conforme LGPD.',
   'https://www.psicavfreitas.com.br',
   'contato@psicavfreitas.com.br',
-  'Olá, Camila! Vim pelo site 😊'
+  'Ola, Camila! Vim pelo site.'
 );
 
 END $$;
