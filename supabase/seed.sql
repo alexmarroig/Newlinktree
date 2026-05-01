@@ -24,7 +24,6 @@ DECLARE
   v_link_form_id     UUID := gen_random_uuid();
   v_link_site_id     UUID := gen_random_uuid();
   v_link_instagram_id UUID := gen_random_uuid();
-  v_link_tcc_id      UUID := gen_random_uuid();
   v_link_how_id      UUID := gen_random_uuid();
 
 BEGIN
@@ -111,8 +110,37 @@ INSERT INTO public.blocks (id, page_id, type, position, content_json) VALUES (
 );
 
 INSERT INTO public.blocks (id, page_id, type, position, content_json) VALUES (
+<<<<<<< HEAD
   v_block_ctas_id, v_page_id, 'ctas', 2,
   '{"layout": "stack"}'::jsonb
+=======
+  v_block_start_id, v_page_id, 'start_here', 2,
+  '{
+    "cards": [
+      {
+        "id": "card-1",
+        "title": "Quero iniciar terapia",
+        "description": "Entre em contato para conversarmos sobre como posso te ajudar",
+        "icon": "MessageCircle",
+        "linkType": "whatsapp"
+      },
+      {
+        "id": "card-2",
+        "title": "Como funciona?",
+        "description": "Entenda o processo terapêutico e o que esperar das sessões",
+        "icon": "HelpCircle",
+        "linkType": "scroll"
+      },
+      {
+        "id": "card-3",
+        "title": "Conheça meu trabalho",
+        "description": "Saiba mais sobre minha abordagem e formação",
+        "icon": "BookOpen",
+        "linkType": "url"
+      }
+    ]
+  }'::jsonb
+>>>>>>> e9a9ccf (Remove TCC button from seed data)
 );
 
 INSERT INTO public.blocks (id, page_id, type, position, content_json) VALUES (
@@ -135,7 +163,53 @@ INSERT INTO public.links (
   'Quero iniciar terapia',
   'whatsapp',
   null,
+<<<<<<< HEAD
   'Olá, Camila! Vim pelo seu site e gostaria de iniciar terapia 😊',
+=======
+  'Olá, Ana Clara! Vim pelo seu perfil e gostaria de saber mais sobre como iniciar o processo terapêutico. 😊',
+  'primary', 0
+),
+(
+  v_link_form_id, v_page_id, v_block_ctas_id,
+  'Formulário de interesse',
+  'Preencha e entrarei em contato',
+  'form', 'ClipboardList',
+  null, null, 'secondary', 1
+),
+(
+  v_link_site_id, v_page_id, v_block_ctas_id,
+  'Conhecer meu site',
+  'Saiba mais sobre minha formação e abordagem',
+  'url', 'Globe',
+  'https://anaclarasilva.com.br', null,
+  'ghost', 2
+),
+(
+  v_link_instagram_id, v_page_id, v_block_ctas_id,
+  'Ver meu Instagram',
+  'Conteúdo sobre saúde mental e psicologia',
+  'instagram', 'Instagram',
+  'https://instagram.com/anaclarasilva.psi', null,
+  'ghost', 3
+),
+(
+  v_link_how_id, v_page_id, v_block_ctas_id,
+  'Como funciona a psicoterapia?',
+  'Entenda o processo antes de começar',
+  'scroll', 'HelpCircle',
+  '#faq', null,
+  'ghost', 4
+);
+
+-- ============================================================
+-- FAQ ITEMS
+-- ============================================================
+INSERT INTO public.faq_items (page_id, question, answer, position) VALUES
+(
+  v_page_id,
+  'Nunca fiz terapia, como é a primeira sessão?',
+  'É uma conversa tranquila para te conhecer e entender o que você está vivendo. Você não precisa chegar sabendo o que dizer: eu te ajudo a organizar isso com calma.',
+>>>>>>> e9a9ccf (Remove TCC button from seed data)
   0
 ),
 (
