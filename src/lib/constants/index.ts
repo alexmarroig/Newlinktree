@@ -2,8 +2,39 @@
 export const APP_NAME = "Therapy Bio Hub";
 export const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-export const DEFAULT_SLUG =
-  process.env.NEXT_PUBLIC_DEFAULT_SLUG ?? "Camila-Freitas";
+export const ETHOS_SITE_URL =
+  process.env.NEXT_PUBLIC_ETHOS_SITE_URL ?? "https://ethos-clinic.com";
+
+// ---- SaaS / Billing ----
+export const TRIAL_DAYS = 7;
+export const BILLING_PROVIDER = "mercado_pago";
+export const ACTIVE_SUBSCRIPTION_STATUSES = ["trialing", "active"] as const;
+export const BLOCKED_SUBSCRIPTION_STATUSES = [
+  "pending",
+  "past_due",
+  "paused",
+  "canceled",
+  "expired",
+] as const;
+
+export const SAAS_PLANS = {
+  professional: {
+    code: "professional",
+    name: "Profissional",
+    monthlyPriceCents: 4900,
+    annualPriceCents: 49000,
+    linkLimit: 20,
+    assetLimit: 50,
+  },
+  premium: {
+    code: "premium",
+    name: "Premium",
+    monthlyPriceCents: 7900,
+    annualPriceCents: 79000,
+    linkLimit: 60,
+    assetLimit: 200,
+  },
+} as const;
 
 // ---- Upgrade ----
 export const ETHOS_UPGRADE_URL =
