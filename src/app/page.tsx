@@ -93,40 +93,53 @@ const LINKTREE_FEATURES = [
 
 export default function MarketingHomePage() {
   return (
-    <main className="min-h-dvh bg-[#F8F4EE] text-stone-950">
-      <section className="relative border-b border-stone-200 bg-[linear-gradient(135deg,#F8F4EE_0%,#EEF7F0_52%,#F8ECEF_100%)]">
-        <div className="mx-auto grid max-w-6xl content-center gap-12 px-6 py-16 lg:min-h-[760px] lg:grid-cols-[1fr_0.9fr] lg:items-center">
+    <>
+      <a
+        href="#conteudo"
+        className="sr-only z-[100] rounded-lg bg-white px-4 py-2 text-sm font-semibold text-emerald-900 shadow-soft focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2"
+      >
+        Pular para conteudo
+      </a>
+      <main id="conteudo" className="min-h-dvh bg-[#F8F4EE] text-stone-950">
+      <section
+        aria-labelledby="biohub-hero-title"
+        className="relative border-b border-stone-200 bg-[linear-gradient(135deg,#F8F4EE_0%,#EEF7F0_52%,#F8ECEF_100%)]"
+      >
+        <div className="mx-auto grid max-w-6xl content-center gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:min-h-[760px] lg:grid-cols-[1fr_0.9fr] lg:items-center lg:py-16">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-800 shadow-soft">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span aria-hidden="true" className="h-2 w-2 rounded-full bg-emerald-500" />
               BioHub por ETHOS
             </div>
-            <h1 className="mt-5 max-w-2xl font-heading text-4xl font-semibold leading-[0.98] sm:text-5xl lg:text-6xl">
+            <h1
+              id="biohub-hero-title"
+              className="mt-5 max-w-2xl font-heading text-3xl font-semibold leading-[1.02] sm:text-5xl sm:leading-[0.98] lg:text-6xl"
+            >
               Uma pagina profissional para psicologas virarem visitas em contatos.
             </h1>
-            <p className="mt-6 max-w-xl text-base leading-7 text-stone-700">
+            <p className="mt-5 max-w-xl text-base leading-7 text-stone-700 sm:mt-6">
               Crie uma presenca digital clara, bonita e facil de manter, com
               WhatsApp, formulario de interesse, leads, analytics e visual
               personalizado. Tudo em um painel simples.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button size="lg" asChild className="bg-emerald-800 text-white hover:bg-emerald-900">
+              <Button size="lg" asChild className="w-full bg-emerald-800 text-white hover:bg-emerald-900 sm:w-auto">
                 <Link href="/auth/register">
                   Criar meu BioHub
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight aria-hidden="true" className="h-4 w-4" />
                 </Link>
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 asChild
-                className="border-stone-300 bg-white/80 hover:bg-white"
+                className="w-full border-stone-300 bg-white/80 hover:bg-white sm:w-auto"
               >
                 <Link href="/pricing">Ver planos</Link>
               </Button>
             </div>
 
-            <dl className="mt-9 grid max-w-xl grid-cols-3 gap-3">
+            <dl className="mt-9 grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-3">
               {[
                 ["7 dias", "para configurar"],
                 ["1 link", "para divulgar"],
@@ -140,24 +153,27 @@ export default function MarketingHomePage() {
             </dl>
           </div>
 
-          <div className="relative">
-            <div className="mx-auto max-w-[390px] rounded-[2rem] border border-white/80 bg-white/85 p-4 shadow-soft-xl backdrop-blur">
+          <aside className="relative" aria-label="Exemplo de pagina publica do BioHub">
+            <div className="mx-auto w-full max-w-[390px] rounded-[1.75rem] border border-white/80 bg-white/85 p-3 shadow-soft-xl backdrop-blur sm:rounded-[2rem] sm:p-4">
               <div className="overflow-hidden rounded-[1.5rem] bg-[#FDFBF7]">
-                <div className="flex h-24 items-start justify-between bg-[linear-gradient(135deg,#0F6B57,#E7838F)] px-5 py-4">
-                  <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white">
+                <div className="flex h-20 items-start justify-between bg-[linear-gradient(135deg,#0F6B57,#E7838F)] px-4 py-4 sm:h-24 sm:px-5">
+                  <span className="rounded-full bg-white/20 px-2.5 py-1 text-[11px] font-semibold text-white sm:px-3 sm:text-xs">
                     biohub.ethos
                   </span>
-                  <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white">
+                  <span className="rounded-full bg-white/20 px-2.5 py-1 text-[11px] font-semibold text-white sm:px-3 sm:text-xs">
                     online
                   </span>
                 </div>
-                <div className="-mt-12 px-5 pb-6 text-center">
+                <div className="-mt-10 px-4 pb-5 text-center sm:-mt-12 sm:px-5 sm:pb-6">
                   <img
                     src={CAMILA_PHOTO}
                     alt="Psicologa Camila Freitas"
-                    className="mx-auto h-24 w-24 rounded-full border-4 border-white object-cover object-top shadow-soft-lg"
+                    width={96}
+                    height={96}
+                    decoding="async"
+                    className="mx-auto h-20 w-20 rounded-full border-4 border-white object-cover object-top shadow-soft-lg sm:h-24 sm:w-24"
                   />
-                  <h2 className="mt-4 font-heading text-2xl font-semibold">
+                  <h2 className="mt-4 font-heading text-xl font-semibold sm:text-2xl">
                     Psicologa Camila Freitas
                   </h2>
                   <p className="mt-1 text-sm text-stone-600">
@@ -174,23 +190,26 @@ export default function MarketingHomePage() {
                           key={item.label}
                           className="flex min-h-[50px] items-center gap-3 rounded-2xl border border-stone-200 bg-white px-4 text-left text-sm font-semibold shadow-soft"
                         >
-                          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-800">
-                            <Icon className="h-4 w-4" />
+                          <span
+                            aria-hidden="true"
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-800"
+                          >
+                            <Icon className="h-4 w-4" aria-hidden="true" />
                           </span>
-                          <span>{item.label}</span>
+                          <span className="min-w-0">{item.label}</span>
                         </div>
                       );
                     })}
                   </div>
-                  <div className="mt-6 flex items-center justify-center gap-3 text-xs font-semibold text-stone-500">
+                  <div className="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs font-semibold text-stone-500">
                     <span>@psi.cavfreitas</span>
-                    <span className="h-1 w-1 rounded-full bg-stone-300" />
+                    <span aria-hidden="true" className="h-1 w-1 rounded-full bg-stone-300" />
                     <span>psicavfreitas.com.br</span>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="mx-auto mt-4 grid max-w-[390px] grid-cols-2 gap-3">
+            <div className="mx-auto mt-4 grid max-w-[390px] grid-cols-1 gap-3 sm:grid-cols-2" aria-label="Destaques do BioHub">
               <div className="rounded-2xl bg-emerald-800 px-4 py-3 text-sm font-semibold text-white shadow-soft-lg">
                 + contatos organizados
               </div>
@@ -198,17 +217,17 @@ export default function MarketingHomePage() {
                 link pronto para compartilhar
               </div>
             </div>
-          </div>
+          </aside>
         </div>
       </section>
 
-      <section className="bg-white px-6 py-16">
+      <section aria-labelledby="painel-title" className="bg-white px-4 py-14 sm:px-6 sm:py-16">
         <div className="mx-auto max-w-6xl">
           <div className="max-w-2xl">
             <p className="text-sm font-semibold uppercase tracking-wider text-emerald-800">
               Tudo no mesmo painel
             </p>
-            <h2 className="mt-3 font-heading text-3xl font-semibold sm:text-4xl">
+            <h2 id="painel-title" className="mt-3 font-heading text-2xl font-semibold sm:text-4xl">
               Da primeira visita ao acompanhamento dos leads.
             </h2>
           </div>
@@ -222,7 +241,7 @@ export default function MarketingHomePage() {
                   className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft transition-transform hover:-translate-y-1 hover:shadow-soft-lg"
                 >
                   <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${feature.bg}`}>
-                    <Icon className={`h-5 w-5 ${feature.color}`} />
+                    <Icon aria-hidden="true" className={`h-5 w-5 ${feature.color}`} />
                   </div>
                   <h3 className="mt-4 font-heading text-lg font-semibold">
                     {feature.title}
@@ -237,13 +256,13 @@ export default function MarketingHomePage() {
         </div>
       </section>
 
-      <section className="border-t border-stone-200 bg-[#F8F4EE] px-6 py-16">
+      <section aria-labelledby="linktree-title" className="border-t border-stone-200 bg-[#F8F4EE] px-4 py-14 sm:px-6 sm:py-16">
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wider text-emerald-800">
               Inspirado no Linktree
             </p>
-            <h2 className="mt-3 font-heading text-3xl font-semibold sm:text-4xl">
+            <h2 id="linktree-title" className="mt-3 font-heading text-2xl font-semibold sm:text-4xl">
               So que pensado para a rotina de uma psicologa.
             </h2>
             <p className="mt-4 text-base leading-7 text-stone-700">
@@ -254,7 +273,7 @@ export default function MarketingHomePage() {
             <div className="mt-6 rounded-2xl border border-stone-200 bg-white p-5 shadow-soft">
               <div className="flex items-center gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-800">
-                  <QrCode className="h-5 w-5" />
+                  <QrCode aria-hidden="true" className="h-5 w-5" />
                 </span>
                 <div>
                   <p className="font-semibold">Um link para todos os canais</p>
@@ -275,7 +294,7 @@ export default function MarketingHomePage() {
                   className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-emerald-800">
-                    <Icon className="h-5 w-5" />
+                    <Icon aria-hidden="true" className="h-5 w-5" />
                   </div>
                   <h3 className="mt-4 font-heading text-lg font-semibold">
                     {feature.title}
@@ -290,14 +309,14 @@ export default function MarketingHomePage() {
         </div>
       </section>
 
-      <section className="border-t border-stone-200 bg-white px-6 py-16">
+      <section aria-labelledby="admin-title" className="border-t border-stone-200 bg-white px-4 py-14 sm:px-6 sm:py-16">
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-center">
             <div>
               <p className="text-sm font-semibold uppercase tracking-wider text-emerald-800">
                 Painel simples
               </p>
-              <h2 className="mt-3 font-heading text-3xl font-semibold sm:text-4xl">
+              <h2 id="admin-title" className="mt-3 font-heading text-2xl font-semibold sm:text-4xl">
                 Edite links, acompanhe leads e ajuste o visual sem depender de ninguem.
               </h2>
               <p className="mt-4 text-base leading-7 text-stone-700">
@@ -309,7 +328,7 @@ export default function MarketingHomePage() {
 
             <div className="rounded-3xl border border-stone-200 bg-[#FAFAF7] p-4 shadow-soft-lg">
               <div className="rounded-2xl bg-white p-5 shadow-soft">
-                <div className="flex items-center justify-between border-b border-stone-100 pb-4">
+                <div className="flex flex-col gap-3 border-b border-stone-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-sm font-semibold text-stone-500">Painel BioHub</p>
                     <h3 className="mt-1 font-heading text-2xl font-semibold">Conteudo</h3>
@@ -326,7 +345,7 @@ export default function MarketingHomePage() {
                   ].map(([name, detail, metric]) => (
                     <div
                       key={name}
-                      className="flex items-center justify-between rounded-2xl border border-stone-100 bg-stone-50 px-4 py-3"
+                      className="flex flex-col gap-2 rounded-2xl border border-stone-100 bg-stone-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div>
                         <p className="font-semibold">{name}</p>
@@ -344,25 +363,26 @@ export default function MarketingHomePage() {
         </div>
       </section>
 
-      <section className="border-t border-stone-200 bg-[#0F2F2A] px-6 py-14 text-white">
+      <section aria-labelledby="cta-title" className="border-t border-stone-200 bg-[#0F2F2A] px-4 py-14 text-white sm:px-6">
         <div className="mx-auto flex max-w-6xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-2 text-sm font-semibold text-emerald-200">
-              <Palette className="h-4 w-4" />
+              <Palette aria-hidden="true" className="h-4 w-4" />
               Personalizavel, simples e pronto para vender seu atendimento.
             </div>
-            <h2 className="mt-3 max-w-2xl font-heading text-3xl font-semibold">
+            <h2 id="cta-title" className="mt-3 max-w-2xl font-heading text-2xl font-semibold sm:text-3xl">
               Comece com uma pagina bonita hoje e evolua seu BioHub no painel.
             </h2>
           </div>
-          <Button size="lg" asChild className="bg-white text-emerald-950 hover:bg-emerald-50">
+          <Button size="lg" asChild className="w-full bg-white text-emerald-950 hover:bg-emerald-50 sm:w-auto">
             <Link href="/auth/register">
               Criar conta
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </Link>
           </Button>
         </div>
       </section>
     </main>
+    </>
   );
 }
